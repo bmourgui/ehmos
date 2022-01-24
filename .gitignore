@@ -6,5 +6,5 @@
 *.pdf
 *.log
 manuscript.md
-results/*
+*.RData
 analysis/not_used
