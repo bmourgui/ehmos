@@ -1,0 +1,495 @@
+---
+title: "A new method to explicitly estimate the shift of optimum in multispecies studies"
+classoption: a4paper
+output:
+  pdf_document:
+  word_document: default
+  documentclass: article
+fontsize: 12pt
+header-includes:
+- \usepackage{float}
+- \usepackage{lscape}
+- \usepackage{amsmath}
+- \usepackage{lineno}
+- \linenumbers
+- \usepackage{setspace}\doublespacing
+csl: methods-in-ecology-and-evolution.csl
+subtitle: 'Running title: Explicit modelling of optimum shifts'
+bibliography: Paper_EHMOS.bib
+---
+
+Bastien Mourguiart$^1$, Benoit Liquet$^{1,2}$, Kerrie Mengersen$^{1,3}$, Thibaut Couturier$^4$, Jérôme Mansons$^5$, Yoan Braud$^6$, Aurélien Besnard$^4$ 
+
+$^1$ Laboratoire de Mathématiques et de leurs Application, Université de Pau et des Pays de l'Adour, E2S UPPA, CNRS, Anglet, France  
+$^2$ Department of Mathematics and Statistics, Macquarie University, Sydney, NSW 2109, Australia  
+$^3$ ARC Centre of Excellence for Mathematical and Statistical Frontiers, School of Mathematical Science, Queensland University of Technology, Brisbane, QLD 4072, Australia  
+$^4$ CEFE, Univ Montpellier, CNRS, EPHE-PSL University, IRD, Univ Paul Valéry Montpellier 3, Montpellier, France  
+$^5$ Parc National du Mercantour, Nice, France  
+$^6$ Bureau d'études Entomia, Vaumeilh, France  
+ 
+Corresponding author: Bastien Mourguiart, Université de Pau et des Pays de l'Adour, UFR des Sciences et Techniques de la côte basque, 1 allée du parc Montaury, 64600 Anglet, France. Email: bastien.mourguiart@univ-pau.fr
+
+\newpage
+
+
+```{r setup2, message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+# set chunk default options for the document
+knitr::opts_chunk$set(echo=FALSE, message=FALSE, warning=FALSE, fig.pos = 'H')
+```
+
+```{r library, message=FALSE, warning=FALSE, include=FALSE}
+library(bookdown)
+library(knitr)
+source(here::here("make.R"))
+```
+
+## Abstract
+
+1) Optimum shifts in species–environment relationships are intensively studied in a wide range of ecological topics, including climate change, species invasion and theoretical ecology. Numerous statistical methods are used to estimate optimum shifts but, to our knowledge, none explicitly model this.
+
+2) We extended an existing model to explicitly estimate optimum shifts for multiple species. We called this new model the Explicit Hierarchical Model of Optimum Shifts (EHMOS). In a simulation study, we compared its accuracy to a mean comparison method and a generalized linear mixed model (GLMM). Specifically, we tested if the accuracy of the methods was sensitive to (1) sampling design, (2) species optimum position, and (3) species ecological specialization. In addition, we compared the three methods using a real dataset of investigated optimum shifts in 24 Orthopteran species between two surveys conducted thirty years apart along an elevation gradient in the French Alps.
+
+3) Of all the simulated scenarios, EHMOS was the most accurate method, regarding RMSE, bias and interval coverage. In the presence of marginal species, i.e. species with an optimum close to a sampling boundary, GLMM had the poorest performance, providing unreliable estimates of optimum shifts. The mean comparison method had the next worst performance, with relatively high negative bias and low interval coverage compared to EHMOS, especially in the presence of generalist species or marginal species in an unbalanced sampling design. The case study results obtained with EHMOS were consistent with what is expected considering ongoing climate change, with mostly upward shifts, which further improved confidence in the accuracy of the EHMOS method.
+
+4) These findings indicate that EHMOS could be used for a wide range of topics and extended to produce new insights, especially in climate change studies. Explicit estimation of optimum shifts notably allows investigation of ecological assumptions that could explain interspecific variability of these shifts.
+
+**Keywords:** species optimum shift, Bayesian hierarchical modelling, species-environment relationship, gradient analysis, species response curve, sampling design, GLMM, mean comparison method  
+
+## Introduction
+
+Understanding changes in relationships between species and environmental, geographical or temporal gradients is of central interest in ecology and evolution. For instance, assessing changes in species distribution along latitudinal [@thorson2016; @ortega2019], elevational [@maggini2011] or climatic [@tayleur2015] gradients in response to ongoing climate change is crucial for developing relevant biodiversity change scenarios [@thorson2016; @ortega2019; @maggini2011]. Modelling these changes is also central in the study of invasive species to predict the area of potential colonization [@elith2010]. The shifts in species phenology, i.e. changes along a temporal gradient, in response to climate change are also well-studied to obtain a mechanistic understanding of climate change impacts on species populations [@moussus2010; @vitasse2021; @strebel2014]. Shifts that could occur along nutritional gradients during a species' lifespan or two occupied regions are also studied in a more theoretical context [@coudun2005; @bertrand2011].
+
+All this research aims at modelling the relationship between species characteristics –  such as occurrence probability [@maggini2011], abundance [@rumpf2018; @thorson2016; @tayleur2015], singing activity [@strebel2014] or fitness [@devillemereuil2020] – and linear covariates describing the studied gradient. These modelled relationships, often named "species response curves" [@tayleur2015], are usually unimodal curves [@maggini2011; @rumpf2018]. They are characterized by a width, a maximum, an optimum (i.e. the value on the gradient where the maximum abundance or occurrence probability of the species is reached), and a lower and upper limit.  Changes in the relationship could then occur in each of these parameters, providing different and complementary information on the way species are affected by change over the gradient. However, these changes may be difficult to estimate. Changes in width or distribution limits of the species response curve, i.e. in species range, may for instance be more difficult to estimate than optimum shifts due to sampling design or detectability issues because abundance is usually lower at range limits [@shoo2006; @moussus2010; @strebel2014]. Hence, studying optimum shifts is often favoured over range shifts to disentangle ecological changes from potential sampling artifacts [@shoo2006; @moussus2010; @veen2021].
+
+Different modelling frameworks have been developed to study optimum shifts. The simplest, and probably the most widely used, is the mean comparison method [e.g. @chen2009; @menendez2014; @freeman2018], also known as the weighted average method [@terbraak1986; @thorson2016], in which mean values of occupied sites on the gradient are compared between two or more samples. However, such optimum estimates could be biased when sampling effort is uneven along the gradient [@shoo2006; @terbraak1986]. Such uneven sampling is common in ecology [@veen2021; @rumpf2018], especially in cases of sampling difficult-to-access terrains such as mountains. Regression methods, such as generalized linear models (GLMs), are also commonly used to estimate optimum shifts [@lembrechts2017; @coudun2005] and are known to be more robust to unbalanced sampling design [@terbraak1986]. In this approach, two regressions are conducted to estimate the species optimum for each sample separately [@coudun2005]. Shift is then calculated as the difference between the two estimated optima. Such a separate analysis makes it difficult to estimate uncertainty around the shift, so this uncertainty is often omitted [e.g. @lembrechts2017; @urli2014]. This absence of uncertainty is particularly prejudicial when post-hoc tests are performed on shift point estimates [@poyry2009]. This approach also raises issues for species with an optimum close to the edge of the sampled gradient, hereafter referred to as edge species, also called marginal species [@hernandez2006; @tessarolo2021]. In these cases, the regression follows a logistic relationship and does not provide an optimum. As a consequence, such edge species are usually withdrawn from analysis [e.g. @rumpf2018; @shoo2006]; however, they may be particularly sensitive to changes as they are limited by certain constraints (physiological, environmental, etc.) and subject to extirpation phenomenon, i.e. local extinctions caused by a lack of remaining suitable areas [@freeman2018]. Moreover, estimates of the mean shift at the community level could be biased by the removal of edge species, as the optimum shift could depend on the position along the gradient [@rumpf2018]. A model robust to unbalanced sampling design, providing estimates of uncertainties and including all species whatever the location of their optimum would be a substantial improvement for modelling shift in optima.
+
+Motivated by a case study on Orthoptera communities sampled twice 30 years apart in the French Alps along an elevation gradient, we tested three methods for estimating optimum shifts of the entire species community. We developed an extension of the Gaussian logistic model [@jamil2014; @terbraak1986] that explicitly estimates shifts in optima for several species simultaneously, with their uncertainties. We also fitted a Bayesian Generalized Linear Mixed Model to simultaneously analyse both sampling occasions and all species and use the posterior distributions of the estimated coefficients to compute posterior distributions of species optimum shifts. The performance of these models was evaluated and compared to the estimates provided by a simple mean comparison method. The comparison was undertaken through a simulation study involving different sampling designs and ecological scenarios. The primary goal of the simulation study was to determine if the tested methods accurately estimate the optimum shifts of multiple species along a virtual environmental gradient. Specifically, we tested if the accuracy of the methods was sensitive to (1) sampling design, i.e. how sampling sites are distributed along the gradient, (2) species marginality, i.e. the location of the species optimum on the gradient, and (3) species ecological specialization, i.e. the width of the species–environment relationship.
+
+## Materials and methods
+
+### Shift modelling
+
+We used a mean comparison method based on the Student t-test (hereafter, t-test) that compares species' average positions along a gradient between two sampling occasions, e.g. two periods or two regions. In this approach, species' optima are estimated as the mean of environmental values at which the species have been observed. We performed unpaired two-sample Student t-tests between surveys for each species separately. This provided species-specific shift estimates and associated confidence intervals.
+
+We developed and fitted two hierarchical models: a 'classic' Generalized Linear Mixed Model (hereafter, cGLMM) and a new Explicit Hierarchical Model of Optimum Shifts (EHMOS). Both models assumed that the occurrence state (present or absent) observed for species $i$ at site $j$ during sampling occasion $k$, $Y_{i,j,k}$, relies on the probability $\psi_{i,j,k}$ that species $i$ can occupy site $j$ during sampling occasion $k$. In both models, we described the observation data as an outcome of a Bernoulli trial:
+
+$$ Y_{i,j,k} \sim \text{Bernoulli}(\psi_{i,j,k}). $$
+
+We assumed that species occupancy probability is related to the gradient through a symmetric bell-shaped curve, with an optimum where the maximum occupancy probability is reached. However, the two models differ in the formulation of the species–environment relationship, i.e. the species response curve.
+
+*Classic Generalized Linear Mixed Model (cGLMM)* – The occupancy probability was modelled on the logit scale as a regression of linear and quadratic effects of environment. To allow for species-specific occurrence relationships with the gradient, regression coefficients were modelled as species random effects. Changes in species distribution along the gradient between sampling occasions were assessed including a binary covariate, $S_k$, taking the value of 0 for one sampling occasion and 1 for the other, and its interaction with the linear and quadratic effects of the environment. As the same sites were included in the two samples, we added a site random effect, $\gamma^{site}_j$, to account for data dependencies. Hence, in our cGLMM the occupancy model was formulated as follows:
+
+  \begin{equation}
+  logit(\psi_{i,j,k}) = \beta_{0i} + \beta_{1i} \times X_j + \beta_{2i} \times {X_j}^2 +
+  \beta_{3i} \times S_k + \beta_{4i} \times S_k \times X_j + \beta_{5i} \times S_k \times {X_j}^2 + \gamma^{site}_j
+  \label{glmm}
+  \end{equation}
+  
+where $\beta_i$ represents the coefficients related to the species-specific effects mentioned above and $X_j$ is the value of the environmental variable at site $j$. Hence, $\beta_{0i}$, $\beta_{1i}$ and $\beta_{2i}$ describe the relationship between species occurrence and elevation during the first sampling, while $\beta_{3i}$, $\beta_{4i}$ and $\beta_{5i}$ denote the changes in the species-specific occurrence–gradient relationship between the two sampling occasions. We calculated the species-specific optimum positions of each sampling occasion, denoted by $\theta_{i,k}$, from these regression coefficients [see Equation 2 in @terbraak1986]. We then calculated species shifts by subtracting optimum values of each sampling occasion as follows:
+
+  \begin{align}
+  \begin{split}
+  \delta_i &= \theta_{i,2} - \theta_{i,1}  \\
+  &= \frac{-(\beta_{1i}+\beta_{4i})}{2 \times (\beta_{2i}+\beta_{5i})} - \frac{-\beta_{1i}}{2 \times \beta_{2i}}
+  \label{shift_glmm}
+  \end{split}
+  \end{align}
+  
+where $\delta_i$ is the optimum shift of species $i$.  
+
+*Explicit Hierarchical Model of Optimum Shifts (EHMOS)* – We extended the multi-species Gaussian logistic model developed to describe species unique unimodal response curves [@jamil2014] to explicitly estimate shift in optimum positions between two sampling occasions. Our model, named Explicit Hierarchical Model of Optimum Shifts (EHMOS), describes multiple species–environment relationships simultaneously for two samples. Species response curves are described through four ecologically meaningful parameters ($\alpha_{i,k}$, $\theta_i$, $\delta$ and $\tau_{i,k}$). The occupancy model was written as follows:
+
+  \begin{equation}
+  logit(\psi_{i,j,k}) = \alpha_{i,k} - \frac{[\text{X}_j - (\theta_{i} + (\text{S}_k \times \delta_{i}) )]^2}{2 \times {\tau_{i,k}}^2} +
+  \gamma^{site}_j
+  \label{eq_ehmos}
+  \end{equation}
+  
+where $\alpha_{i,k}$ represents the maximum occupancy probability on the logit scale reached by species $i$ in sampling occasion $k$ (see ESM1); $\theta_i$ is the environmental optimum of species $i$ for the first sampling occasion (as the binary variable $S_k$ is coded as $S_1 = 0$ and $S_2 = 1$); $\delta_i$ is the shift between the two optima for species $i$; $\tau_{i,k}$ is the species' ecological tolerance, a measure of the gradient portion length on which the species could occur (see ESM 1). Each parameter is considered and modelled as a species random effect, allowing both a community mean shift and species-specific shifts around this mean. The maximum occupancy probability and the tolerance could also vary between sampling occasions.
+
+In both models (Eq. (\ref{glmm}) and (\ref{eq_ehmos})), the gradient covariate was standardized to have a mean equal to zero and variance equal to one. Each random parameter was modelled as drawn from a normal distribution described by the community mean ($\mu$) and the variance between species ($\sigma^2$). Those community parameters are shared between the two sampling occasions for all the GLMM parameters ($\beta_i$'s), and for the optimum ($\theta_i$) and the shift ($\delta_i$) in the EHMOS model. For the parameters $\alpha_{i,k}$ and $\tau_{i,k}$, the community means could vary between periods.
+
+We implemented the two models in a Bayesian context. We then obtained posterior distributions for each species-specific parameter. Assuming a lack of prior knowledge of a parameter's true value, hyper-parameters were afforded non-informative priors. We used wide normal priors (with mean 0 and variance 1000) for the means of community-level effects (the $\mu$'s) and inverse-gamma priors ($\text{Inv-gamma}(0.1, 0.1)$) for the community-level variances (the $\sigma^2$'s). In the cGLMM, we computed posterior distributions of the shifts from MCMC samples of the regression coefficients (Eq. (\ref{shift_glmm})). Hence, for both models we had posterior distributions for the species-specific shifts in optimum position. We used medians as point estimates and symmetric 95\% credible intervals as corresponding measures of uncertainty. Symmetric 95\% credible intervals were computed based on 0.025 and 0.975 quantiles of the MCMC posterior distributions.
+
+We coded the two hierarchical Bayesian models in BUGS language and ran them in JAGS [@plummer2003], using the _jagsUI_ package [@kellner2021] in R software [@r2018]. The code is available in ESM 2. We ran the analysis with the function `autojags()`, which updates the number of iterations within the burn-in phase until all parameters have a Gelman-Rubin statistic ($\hat{R}$) less than 1.1, suggesting satisfactory convergence [@gelman2013], or when the total number of iterations reached a maximum set at 250,000 iterations. We ran three MCMC chains with a thinning rate of 10 and with an initial burn-in phase of 15,000 iterations that was updated by 15,000 iterations until the specified convergence level was met or the maximum number of iterations was reached.
+
+### Simulation study
+
+We simulated the sampling of a community of 20 species during two sampling occasions at 300 sampling sites distributed along an elevational gradient ranging from 1000 m to 3000 m. We used two sampling design sub-scenarios: the distribution along the virtual elevation gradient of the sampling sites was either uniform, in sampling sub-scenario A1, or unbalanced, in sampling sub-scenario A2 (Panels A1 and A2 in Fig. 1). In the unbalanced design, the simulated sampling sites followed a truncated normal distribution of mean 1970 m, standard-deviation 335 m restricted between 1000 m and 3000 m. We chose the mean and standard deviation according to those observed in the motivating example (see below).
+
+We then positioned on the virtual gradient the optima of each species for the two virtual sampling occasions. We defined two optimum sub-scenarios (coded B1 and B2). In optimum sub-scenario B1, 100\% of species had both their optima in the middle of the sampling range, hereafter 'middle species' (green points in Fig. 1), while in B2 30\% of species (six species) were considered as 'edge species', i.e. had their optima close to the boundaries of the sampled gradient (red points in Fig. 1). We defined the middle of the sampling range as the part of the gradient that contains 80\% of the sampling sites (green areas in Fig. 1), the upper and lower parts of the remaining sampling range were considered the sampling edges (orange areas in Fig. 1). We simulated half of the optima of the edge species close to the upper edge, and the other half close to the lower edge. Simultaneously with the optimum of the first sampling occasion (full points in Fig. 1), we simulated the optimum shift, thus obtaining the second optimum (circles in Fig. 1), to respect percentages of edge and middle species in both sampling occasions. For all optimum sub-scenarios, we computed 60\% of upward shifts, 20\% of downward shifts and 20\% of no shift to test all kinds of response while keeping the majority of upward shifts as expected in conditions of ongoing climate change. The values of upward and downward shifts were sampled from a uniform distribution bounded between 80 m and 250 m, and ‑250 m and -80 m respectively.
+
+We used two ecological specialization sub-scenarios (C1 and C2). In sub-scenario C1, we simulated only specialist species, i.e. species having a narrow ecological niche and high maximum occurrence probability. In sub-scenario C2, we simulated 50\% of specialist and 50\% of generalist species having a wider ecological niche and lower maximum occurrence probability than specialist species. We allowed for changes in shape parameters between sampling occasions in both sub-scenarios, but not in ecological specialization type: i.e. a generalist species remains a generalist species, but could have slightly different species response curves in the two sampling occasions. Niche width and maximum occurrence probability were sampled from uniform distributions, independently for the two sampling occasions, with the distribution parameters depending on the ecological specialization type. Specialist species had widths ranging from 400 m and 600 m, while generalists' width ranged between 1200 m and 1400 m. Maximum probability was set between 0.9 and 0.99 for specialist species, and between 0.75 and 0.85 for generalist species. These distribution parameter values were chosen to clearly separate the two types of species and match the values observed in the motivating example. We ran all possible combinations of the sub-scenarios, resulting in eight simulated scenarios. In each, we considered each species to have a symmetric unimodal response curve in both sampling occasions (Fig. 1 bottom panels). We produced site-specific probability of occupancy for each species in each scenario following:
+
+$$logit(\psi_{i,j,k}^{s}) = \alpha_{i,k}^{s} - \frac{[\text{X}_j^{s} - (\theta_{i}^{s} + (\text{S}_k \times \delta_{i}^{s}) )]^2}{2 \times {\tau_{i,k}^{s}}^2}$$
+
+with $\psi_{i,j,k}^{s}$ the occurrence probability of species $i$ at site $j$ during sampling occasion $k$ simulated in scenario $s$, $\text{X}_j^{s}$ is the value on the elevation gradient of site $j$ under scenario $s$, $\theta_{i}^{s}$ and $\delta_{i}^{s}$ are respectively the optimum and shift of species $i$ in scenario $s$, and $\alpha_{i,k}^{s}$ and $\tau_{i,k}^{s}$ are related to niche width and maximum probability of occupancy (ESM 1). Observed presence or absence of species $i$ at site $j$ during sampling occasion $k$ under scenario $s$, $Y_{i,j,k}^{s}$, was then drawn from a Benoulli distribution: $Y_{i,j,k}^{s} \sim Bernoulli(\psi_{i,j,k}^{s})$. We replicated the Bernoulli trials 30 times for each of the 8 scenarios, resulting in 240 simulated datasets.
+
+### Model performance assessment
+
+We assessed estimation accuracy and precision through four metrics (i) bias, the difference between true and estimated absolute optimum shifts, (ii) root mean squared error, which combines bias and imprecision, (iii) interval coverage, i.e. the proportion of estimated credible/confidence intervals that contain the true optimum shifts, and (iv) interval score, which combines information on width of credible/confidence intervals and on interval coverage. Details on the calculation of the four metrics are provided in ESM 3. We also compared the computing performance of the Bayesian models. We counted the number of times when at least one parameter failed to converge after the maximum of iterations was reached. Due to the number of runs and parameters, we just looked at the Gelman-Rubin statistic threshold of 1.1 [@gelman2013] and did not make visual diagnostics. We also computed the average running time for each model.
+
+### Motivating example
+
+Our goal when starting this study was to find an appropriate modelling approach that produces estimates, and associated uncertainties, of shifts in elevation optima of an Orthoptera community studied during two periods separated by 30 years. The study we selected for the data was conducted in 134 sampling sites distributed along an elevation gradient ranging from 928 m to 2614 m (mean = 1869 m) above sea level in Mercantour National Park in the southern French Alps. The first survey was carried out during the summers between 1983 and 1988 (Gueguen 1990). At each site, the density of Orthoptera species was assessed based on multiple counts made using box quadrats that trapped individuals. The second survey was conducted during the summers of 2018 and 2019. Each sampling site consisted of a circle with a 70-m radius where five spatial replicates (hereafter, plots) 30 m2 in area were surveyed following three successive steps: (1) one minute of listening to species stridulating in the plot by standing close to its edge, (2) six minutes of sighting species by walking across the entire plot, and (3) two 45-second sweep netting sessions across the entire plot (see Mourguiart et al. 2021 for a full description of the sampling design). To minimize the effect of varying sampling effort and detection methods between surveys, we reduced the Orthoptera records to the presence/absence data at the site level and only kept species detected in at least 5\% of sampling sites, resulting in 24 species. We pooled some species' data in a species complex when species confusion was possible. Thus, we aggregated data for species in the genuses *Yersinella*, *Calliptamus*, *Podisma* and in the complex *Chorthippus biggutulus-brunneus-mollis-daimei*.
+
+## Results
+
+Before analysing the results, we checked for convergence issues and running times of cGLMM and EHMOS. In the $\hat{R}$ statistics check, we observed that 50\% of runs failed to converge (at least one parameter had $\hat{R}$ higher than 1.1) for cGLMM (see details per scenario in ESM 4). Due to the running time, `r m.compute_time[m.compute_time$model == "glmm", ]$mean` hours (SD = `r m.compute_time[m.compute_time$model == "glmm", ]$SD` hours) on average for cGLMM (see details per scenario in ESM 4), we chose not to re-run more iterations of models that did not converge. All models converged for EHMOS and took on average `r m.compute_time[m.compute_time$model == "ehmos", ]$mean` hours (SD = `r m.compute_time[m.compute_time$model == "ehmos", ]$SD` hour) for this process (see details per scenario in ESM 4). In the motivating example, both models converged: EHMOS ran in `r round(out_appli_ehmos$mcmc.info$elapsed.mins, 0)` minutes and cGLMM in `r round(out_appli_glmm$mcmc.info$elapsed.mins, 0)` minutes.
+
+### Simulation
+
+Averaging performance metrics for all species in the eight scenarios, we found that EHMOS performed better than cGLMM and t-test whatever the performance metrics. EHMOS had the smallest average RMSE (mean = `r round(overall_perf[overall_perf$model == "ehmos", ]$m.RMSE, 0)`, SD = `r round(overall_perf[overall_perf$model == "ehmos", ]$sd.RMSE, 0)`), bias (mean = `r round(overall_perf[overall_perf$model == "ehmos", ]$m.bias, 0)`, SD = `r round(overall_perf[overall_perf$model == "ehmos", ]$sd.bias, 0)`), interval score (mean = `r round(overall_perf[overall_perf$model == "ehmos", ]$m.IS, 0)`, SD = `r round(overall_perf[overall_perf$model == "ehmos", ]$sd.IS, 0)`), and the largest interval coverage (mean = `r round(overall_perf[overall_perf$model == "ehmos", ]$m.coverage, 2)`, SD = `r round(overall_perf[overall_perf$model == "ehmos", ]$sd.coverage, 2)`). cGLMM had similar interval coverage to EHMOS (mean = `r round(overall_perf[overall_perf$model == "glmm", ]$m.coverage, 2)`, SD = `r round(overall_perf[overall_perf$model == "glmm", ]$sd.coverage, 2)`), but relatively high positive bias (mean = `r round(overall_perf[overall_perf$model == "glmm", ]$m.bias, 0)`, SD = `r round(overall_perf[overall_perf$model == "glmm", ]$sd.bias, 0)`), the largest RMSE of all three methods (mean = `r round(overall_perf[overall_perf$model == "glmm", ]$m.RMSE, 0)`, SD = `r round(overall_perf[overall_perf$model == "glmm", ]$sd.RMSE, 0)`), and interval score (mean = `r round(overall_perf[overall_perf$model == "glmm", ]$m.IS, 0)`, SD = `r round(overall_perf[overall_perf$model == "glmm", ]$sd.IS, 0)`). The t-test had an intermediate RMSE (mean = `r round(overall_perf[overall_perf$model == "t.test", ]$m.RMSE, 0)`, SD = `r round(overall_perf[overall_perf$model == "t.test", ]$sd.RMSE, 0)`) and interval score (mean = `r round(overall_perf[overall_perf$model == "t.test", ]$m.IS, 0)`, SD = `r round(overall_perf[overall_perf$model == "t.test", ]$sd.IS, 0)`)  between cGLMM and EHMOS, with bias as high as cGLMM, but negative (mean = `r round(overall_perf[overall_perf$model == "t.test", ]$m.bias, 0)`, SD = `r round(overall_perf[overall_perf$model == "t.test", ]$sd.bias, 0)`), and the smallest interval coverage of the three methods (mean = `r round(overall_perf[overall_perf$model == "t.test", ]$m.coverage, 2)`, SD = `r round(overall_perf[overall_perf$model == "t.test", ]$sd.coverage, 2)`). 
+
+At the scenario level, EHMOS was still the most accurate method. It performed as well as cGLMM in scenarios with only middle species, i.e. scenarios including sub-scenario B1 (Fig. 2 upper panels), and was much more accurate than cGLMM in scenarios with edge species, i.e. scenarios including sub-scenario B2 (Fig. 2 lower panels). Averaging performance metrics for only edge species, we obtained an average RMSE almost three times larger for cGLMM than for EHMOS. cGLMM estimates of the quadratic effect of environment on species occurrence could be close to zero for edge species (ESM 5), yielding an unreliably high ratio of linear and quadratic coefficients, thus unreliable optimum and optimum shift estimates (Eq. \ref{shift_glmm}). Hence, on average for edge species, cGLMM had larger positive bias (`r round(perf_Topti[perf_Topti$model == "glmm" & perf_Topti$T_opti == "Edge",]$m.bias, 0)` m) and interval score (`r round(perf_Topti[perf_Topti$model == "glmm" & perf_Topti$T_opti == "Edge",]$m.IS, 0)`) compared to EHMOS (mean bias = `r round(perf_Topti[perf_Topti$model == "ehmos" & perf_Topti$T_opti == "Edge",]$m.bias, 0)` m; mean interval score = `r round(perf_Topti[perf_Topti$model == "ehmos" & perf_Topti$T_opti == "Edge",]$m.IS, 0)`).  
+
+The t-test method had comparable results to EHMOS in scenarios A1xB1xC1 and A1xB1xC2, with only slightly larger average RMSEs and interval score (Fig. 2, Table 1). For scenarios including edge species, i.e. scenarios including sub-scenario B2, there was only a slight difference in RMSEs between EHMOS and the t-test method (Fig. 2). However, the t-test method, in scenarios with edge species, had on average negative bias that was at least two times larger than EHMOS bias (Fig. 2). The t-test method also had poorer interval metrics than EHMOS, with interval coverage never reaching the expected threshold of 95\%, in contrast to EHMOS, which always reached this threshold (Fig. 2), and with interval scores 30\% to 150\% larger than EHMOS in scenarios with edge species (Table 1). The t-test method also resulted in poorer performance than EHMOS in scenarios with unbalanced sampling design (sub-scenario A2), with negative bias, smaller interval coverage and larger interval score (Fig. 2, Table 1). Differences between the EHMOS and t-test method performances in scenarios with unbalanced sampling design were exacerbated by the presence of generalist species (scenario A2xB1xC2 and A2xB2xC2 in Fig. 2 and Table 1). The t-test had a high average negative bias of `r round(perf_scenario[perf_scenario$model == "t.test" & perf_scenario$scenario == "A2xB1xC2",]$m.bias, 0)` m and `r round(perf_scenario[perf_scenario$model == "t.test" & perf_scenario$scenario == "A2xB2xC2",]$m.bias, 0)` m, small average interval coverage of `r round(perf_scenario[perf_scenario$model == "t.test" & perf_scenario$scenario == "A2xB1xC2",]$m.coverage*100, 0)`\% and `r round(perf_scenario[perf_scenario$model == "t.test" & perf_scenario$scenario == "A2xB2xC2",]$m.coverage*100, 0)`\%, and large interval scores of `r round(perf_scenario[perf_scenario$model == "t.test" & perf_scenario$scenario == "A2xB1xC2",]$m.IS, 0)` and `r round(perf_scenario[perf_scenario$model == "t.test" & perf_scenario$scenario == "A2xB2xC2",]$m.IS, 0)` in scenarios A2xB1xC2 and A2xB2xC2. In comparison, EHMOS is relatively unbiased, with an average bias of `r round(perf_scenario[perf_scenario$model == "ehmos" & perf_scenario$scenario == "A2xB1xC2",]$m.bias, 0)` m and `r round(perf_scenario[perf_scenario$model == "ehmos" & perf_scenario$scenario == "A2xB2xC2",]$m.bias, 0)` m, had average interval coverage superior to 95\% for both scenarios, and had smaller interval scores: `r round(perf_scenario[perf_scenario$model == "ehmos" & perf_scenario$scenario == "A2xB1xC2",]$m.IS, 0)` and `r round(perf_scenario[perf_scenario$model == "ehmos" & perf_scenario$scenario == "A2xB2xC2",]$m.IS, 0)` for scenarios A2xB1xC2 and A2xB2xC2 respectively.
+
+### Application
+
+On average, species shifted upslope (Fig. 3), with the mean shift ranging from `r appli_mean_shift[appli_mean_shift$model == "ttest", ]$m.shift %>% round(0)` m (SD = `r appli_mean_shift[appli_mean_shift$model == "ttest", ]$sd.shift %>% round(0)` m) and `r appli_mean_shift[appli_mean_shift$model == "glmm", ]$m.shift %>% round(0)` m (SD = `r appli_mean_shift[appli_mean_shift$model == "glmm", ]$sd.shift %>% round(0)` m) to `r appli_mean_shift[appli_mean_shift$model == "ehmos", ]$m.shift %>% round(0)` m (SD = `r appli_mean_shift[appli_mean_shift$model == "ehmos", ]$sd.shift %>% round(0)` m) based on the estimates from the t-test, cGLMM and EHMOS respectively. All significant shifts were upslope for the three methods, with 11, 8 and 10 species having significant shifts based respectively on EHMOS, cGLMM and t-test credible or confidence intervals. However, we observed heterogeneity between species, with estimated shifts ranging from 19 m (*Stauroderus scalaris*) to 344 m (*Bicolorana bicolor*) based on EHMOS, -124 m (*Platycleis albopunctata*) to 419 m (*Omocestus harmorrhoidalis*) based on cGLMM estimates and, -30 m (*Platycleis albopunctata*) to 356 m (*Bicolorana bicolor*) based on t-test results.
+
+The three methods provided heterogeneous shift estimates (Fig. 3). T-test estimates seemed to be smaller than those estimated by cGLMM or EHMOS. To verify this observation, we performed a paired t-test on species point estimates between methods. We found significant differences between the t-test and cGLMM estimates (mean difference = `r round(appli_ttest.vs.glmm$estimate, 0)`, t(`r appli_ttest.vs.glmm$parameter`) = `r round(appli_ttest.vs.glmm$statistic, 2)`, p = `r round(appli_ttest.vs.glmm$p.value, 2)`) and EHMOS estimates (mean difference = `r round(appli_ttest.vs.ehmos$estimate, 0)`, t(`r appli_ttest.vs.ehmos$parameter`) = `r round(appli_ttest.vs.ehmos$statistic, 2)`, p < 0.01), confirming our observation on the graph. Methods also differed in the precision of estimates. The t-test had on average narrower confidence intervals with a mean confidence interval width of `r appli_mean_CI.shift[appli_mean_CI.shift$model == "ttest", ]$m.CI.shift %>% round(0) ` m, compared to EHMOS (`r appli_mean_CI.shift[appli_mean_CI.shift$model == "ehmos", ]$m.CI.shift %>% round(0) ` m) and cGLMM (`r appli_mean_CI.shift[appli_mean_CI.shift$model == "glmm", ]$m.CI.shift %>% round(0) ` m). This high value for cGLMM is due to unreliably wide credible intervals for nine species (Fig. 3). Those unrealistic estimates could be explained by quadratic coefficients, the denominator in optimum formulae (Eq. \ref{shift_glmm}), estimated close to zero and generating unreliable optimum estimates and thus shift estimates. This seemed to occur for taxa having their optimum close to the sampling edge (before the 10^th^ or beyond the 90^th^ percentile of the sampling site elevations, depicted as orange rectangles in Fig. 3), for example,  *Yersinella sp.* and *Gomphocerus sibiricus sibiricus*, or species having low maximum occupancy probability, e.g. *Omocestus haemorrhoidalis*.
+
+## Discussion
+
+In this study, we performed simulations to test the accuracy of optimum shift estimates of a new model, the Explicit Hierarchical Model of Optimum Shifts (EHMOS), compared to a more standard GLMM and method based on the comparison of the mean. The simulation study provides evidence that EHMOS generally performed better than the two other methods. cGLMM performed identically to EHMOS when species had their optimum in the middle of the sampling gradient, but was inaccurate and very imprecise when some species had their optimum close to the sampling limits. We also found that the mean comparison method tended to be negatively biased, with low interval coverage in scenarios involving edge species or unbalanced sampling design, especially when generalist species were included. The case study confirmed that the three methods provide different results. cGLMM provided unreliable estimates for nine of the 24 Orthoptera species, and the mean comparison method had on average smaller shift estimates than the other two methods. On average, we found that species had shifted upslope by `r appli_mean_shift[appli_mean_shift$model == "ttest", ]$m.shift %>% round(0)` m (SD = `r appli_mean_shift[appli_mean_shift$model == "ttest", ]$sd.shift %>% round(0)` m) and `r appli_mean_shift[appli_mean_shift$model == "glmm", ]$m.shift %>% round(0)` m (SD = `r appli_mean_shift[appli_mean_shift$model == "glmm", ]$sd.shift %>% round(0)` m) to `r appli_mean_shift[appli_mean_shift$model == "ehmos", ]$m.shift %>% round(0)` m (SD = `r appli_mean_shift[appli_mean_shift$model == "ehmos", ]$sd.shift %>% round(0)` m) based on estimates from the t-test, cGLMM and EHMOS respectively.
+
+EHMOS always performed better than the t-test-based method. Differences between these two methods were particularly large under unbalanced sampling design, and especially in the presence of generalist species. It is well known that t-tests can produce biased optimum estimates if sampling design is not balanced along the environmental gradient [@terbraak1986]. It is predictable that mean estimates are biased by unbalanced sampling designs, in particular in our specific unbalanced sampling that preferentially selected for sites at the centre of the gradient leading to a bias towards this. In such situations, both optima estimates could be biased towards the middle of the gradient and shift estimates could be biased towards zero, explaining the negative bias observed in our simulated scenarios involving unbalanced sampling design. It is also not surprising that bias due to unbalanced sampling design is larger for generalist species than for specialist species. Bias is more influenced by the distribution of sampling sites occupied by the species rather than by the entire distribution of sampling sites. Occupied sites of a specialist species with a narrow range could be uniformly distributed even if the entire distribution of sampling sites is uneven. In contrast, the larger the species range, the more the occupied site distribution on the gradient will match the entire sampling site distribution, leading to biased shift estimates.
+
+A slightly larger bias with the t-test than with EHMOS was also observed in scenarios involving edge species, even with balanced sampling. This could be explained by the sensitivity of t-tests to species response curve truncation [@terbraak1986]. In this case, the species–environment relationship is only partially observed, and the optimum is underestimated as the species range is not entirely covered [@terbraak1986]. Bias will thus increase with the magnitude of truncation. Hence, edge species that shifted towards the sampling range margins will have their second optimum more severely biased than the first, inducing underestimation in the shift estimates. Such a bias that depends on the species type could lead to misleading conclusions when comparing magnitudes of shifts between species types. Previous studies concluded that edge species shifted less than middle species [@menendez2014]. While this finding is ecologically consistent, it could have been exacerbated by the bias associated to the use of the mean comparison method.
+Generalized linear models have been extensively used in species distribution modelling [@elith2010; @guisan2005], and also in optimum shift modelling [e.g. @osullivan2021; @coudun2005; @urli2014]. Usually, multiple GLMs are conducted separately for each species and each survey that is to be compared [but see @lembrechts2017 using GLMM]. Rather than comparing the EHMOS method to this common practice, we chose to develop a unique GLMM, as it is known that estimates are improved in such a unified framework, especially for data-poor species, which borrow information from data-rich species [@ovaskainen2011]. We also chose to work in a Bayesian context to be able to easily derive uncertainty measures associated with shift estimates. The Bayesian GLMM we developed here performed as well as the EHMOS and better than the mean comparison method in scenarios where all species have optimums in the middle of the sampling range. However, as expected, for edge species, the standard GLMM failed to estimate bell shape curves, fitting sigmoid curves instead and making derived optimums and shifts unreliable [@citores2020; @terbraak1986]. Hence, the standard GLMM appeared to be less flexible than EHMOS. It also exhibited some unresolved convergence issues, while EHMOS never failed to converge. Even in scenarios without edge species, such as scenario A1xB1xC1, cGLMM failed to converge in several replications of the simulations. Resolving these convergence issues would at least require increasing the number of iterations, and thus could be time consuming without any guarantee of success [@mcelreath2016].
+
+In addition to having more robust point estimate accuracy whatever the sampling design, ecological marginality and specialization than a t-test or cGLMM, EHMOS also seemed to produce more precise estimates. cGLMM was very sensitive to ecological marginality in terms of precision, providing very wide and uninformative credible intervals for edge species. The interval coverage of the t-test was also very sensitive to ecological marginality, sampling design and ecological specialization. Having informative precision estimates and reporting them is important when studying species shifts [@bates2015; @taheri2021]. Some authors use the overlap of confidence intervals as a surrogate for a test of significant difference [@urli2014], so low interval coverage could lead to misleading conclusions, and the t-test method should be avoided. Shift estimates could also be used to advise practitioners regarding management actions [@watson2012]. In such cases, modellers should be transparent about uncertainties around their estimates [@taheri2021; @ortega2019]. Transparency about estimate uncertainty is also needed when comparing shifts between studies or even species [@parker2016]. Ignoring the fact that estimates are just observations obtained by a particular method on a particular sample could lead to misleading conclusions about underlying ecological processes. For example, comparing similar shifts of two species that share explaining ecological traits could have different point estimates, due to sampling artefact or model imprecision, and could thus blur the signal of ecological trait effects on shifts [@beissinger2021].
+
+In our case study, we studied optimum shifts between two surveys conducted 30 years apart of 24 Orthoptera species along an elevational gradient in the French Alps. All methods suggested that on average Orthoptera species shifted their optimum towards higher elevations, and that the magnitude of the shift varies between species. These results are consistent with previous findings on other insect taxa, which on average have shifted upslope, but at different paces depending on the species [@vitasse2021; @poyry2009; @menendez2014]. Even if the magnitude of shifts varied between methods, our estimates are in line with the estimated warming rate of 0.36 $^{\circ}$C.decade^-1^ in the Alps between 1970 and 2019, which roughly corresponds to a mean shift of about +62–71 m decade^–1^ (Vitasse et al. 2021), leading to an expected mean shift of around +186–213 m between the two surveys. Thus, the average shift estimated by EHMOS (`r appli_mean_shift[appli_mean_shift$model == "ehmos", ]$m.shift %>% round(0)` m) is closer to what is expected than the t-test, suggesting it may provide a more reliable estimate of optimum shift. Yet this observation has to be taken carefully, as the warming rate could vary between regions, and species might respond at a slower rate than expected [@vitasse2021; @williams2021]. However, as the case study is close to the scenario A2xB2xC2 of our simulations, with the presence of both generalist and edge species sampled with an unbalanced sampling design, we could suspect an underestimation of optimum shifts by the t-test as observed in these simulations. It was also not surprising to obtain unreliable wide credible intervals for most of the edge species with the GLMM, as the simulations provide such evidence.
+
+Notwithstanding its demonstrated comparative advantages, EHMOS could have some limitations. It might produce optimum estimates outside the sampling range and thus, depending on the sampling design, outside the environmental range. This property could be an advantage in the case of niche truncation. However, optimum estimates should be limited to the environmental range: for example, by imposing an appropriate prior. One potential other limitation, also valid for cGLMM, is the assumption that species response curves are symmetric. It is known that species can have asymmetric relationships with the environment [@austin2002; @oksanen2002]. However, finding a right balance between simplicity and complexity is an open debate beyond the scope of our paper [@merow2014; @bell2016].
+
+EHMOS presents some advantages and potential extensions that we did not explore through our simulation analysis that may be interesting for future research. Its explicit formulation of optimum shifts could allow direct testing of ecological assumptions about inter-specific variability: for example, assumptions about species traits that may affect the magnitude of shifts. Species trait effects could be added directly in the model through the random effect specification of shift [@jamil2014]. The potential effect of species ecological marginality on magnitude of shift could also be tested by adding the correlation between optimum and shift parameters. In the same way, one could test if species ecological specialization affects the magnitude of shifts by adding the correlation between tolerance and shift model parameters. Finally, while we focused on the particular case of sampling the same sites at two sampling occasions, we assumed that EHMOS would perform equally in the case of different sites sampled at each sampling occasion. It could also be easily extended to deal with more than two sampling occasions. EHMOS thus appears a highly flexible method that could be used in various fields.
+
+## Acknowledgments
+We thank Damien Combrisson from the Ecrin National Park that contributed to earlier stages of this research. We also thank Alain Gueguen to allow us to use his data. B.M. was supported by the UPPA-E2S international chaire of Kerrie Mengersen.
+
+## Conflict of interest statement
+All authors declare no conflict of interest.
+
+## Authors' contribution statement
+B.M., B.L. and A.B. conceived the ideas for this paper; B.M. wrote the manuscript and conducted the analyses with advice from B.L., K.M. and A.B.; T.C., J.M., Y.B. and A.B. conceived the sampling design and Y.B. collected field data with support from T.C. and J.M.; All the authors read and approved the final
+manuscript. 
+
+## Data availability
+The data that support the findings of this study are available from the corresponding author upon reasonable request.
+
+## References
+<div id="refs"></div>
+
+## Figures and tables
+
+```{r graph_simu, echo=FALSE, fig.align='center', fig.cap="", fig.dim=c(8.3, 9.4), message=FALSE, warning=FALSE}
+
+cowplot::plot_grid(g_subscenarA, g_subscenarB, g_subscenarC, g_scenar, 
+                   nrow=4,
+                   labels=c("(1)", "(2)","(3)","(4)"),
+                   label_size = 12)
+```
+
+Figure 1: Example of the simulation process for two scenarios each broken down in three categories of sub-scenarios: (1) the sampling design either uniform (A1) or unbalanced (A2) (2) the optimum positions for the first (full points) and second (circles) sampling occasions of the 20 species, which is either in the middle (green area) or close to the edges (orange areas) of the sampling range in variable proportions depending on sub-scenario category (B1: 100\% middle, B2: 70\% middle) (3) the ecological specialization of species, which can be specialist (dark curves) or generalist species (purple curves) in variable proportions depending on the sub-scenario category (100\% [C1] or 50\% [C2] of specialist species). The bottom panel represents (4) the species response curves for the first and second sampling occasion (solid and dashed lines) of the two scenarios that results in the combination of the three sub-scenarios above.
+
+```{r graph_metrics, fig.cap = "", fig.dim = c(8.3, 11.7), fig.align = 'center'}
+
+fig2
+
+```
+
+Figure 2: Distribution of species specific performance metrics for the eight simulated scenarios after 30 replications. The colour of the points represents species optimum position along the simulated gradient  (in the edge, orange points, or in the middle, green points). Shape of points corresponds to species ecological specialization type relative to the width of their ecological niche (generalist species with broad ecological niche, represented by inverted triangles, or specialist species with narrower ecological niche, represented by circles).
+
+\newpage
+
+```{r table_IS, tab.pos = "!h"}
+
+tab1 %>%
+  kableExtra::kable(format = "latex",
+        caption = "Average species specific interval scores for the eight simulated scenarios after 30 replications. Numbers in brackets represent standard deviations. ", 
+        booktabs = T) %>%
+  kableExtra::pack_rows("Uniform sampling", 1, 4) %>%
+  kableExtra::pack_rows("Unbalanced sampling", 5, 8)
+
+```
+
+
+```{r graph_appli, echo=FALSE, fig.cap="", fig.align='center', fig.dim=c(7,6), message=FALSE, warning=FALSE}
+
+fig3
+
+```
+Figure 3: Shift estimates following three statistical methods on 24 Orthoptera species optimum positions between 1980–1988 and 2018–2019 along an elevational gradient in Mercantour National Park (French Alps). The points correspond to the mean estimates and the segments to the associated 95\% credible or confidence intervals. The black horizontal lines represent graphical range, segments reaching those lines indicate intervals wider than the graphical range. Species are ordered by increasing optimum estimates of the first period, species within orange areas are considered as edge species, and those within green areas as middle species. Species names are coloured depending on their ecological type as defined in the simulation study (purple: generalist species and black: specialist species).
+
+
+## Supporting information
+## ESM 1: Description of EHMOS' parameters {#esm1}
+In the occupancy model of EHMOS (Eq. (\ref{eq_ehmos})), the four parameters ($\alpha$, $\theta$, $\delta$ and $\tau$) represent ecological descriptors of the species-environment relationship (Fig. S1):
+
+* $\alpha$ corresponds to the maximum probability of occurrence, $\psi_{max}$, on the logit scale. Indeed, the maximum probability of occurrence is reached when gradient value is equal to the optimum, i.e. we have $\psi_j = \psi_{max}$ when $X_j = \theta$. Thus, Eq. (\ref{eq_ehmos}) becomes: 
+$$ log(\frac{\psi_{max}}{1-\psi_{max}}) = \alpha \iff \psi_{max}  =   \frac{1}{1+ \exp(-\alpha)};$$
+
+* $\theta$ is the species optimum, the environmental value at which species reached its maximum probability of occupancy;
+
+* $\delta$ is the species shift between two optima;
+
+* $\tau$ represents the environmental tolerance of a species, i.e. the gradient range that a species can occupy. It can be related to the width, $\omega$, of the species response curve at a specified occupancy probability threshold, $p_{\omega}$, by:
+$$ \omega = 2 \times \tau \sqrt{2 \times (\alpha - logit(p_{\omega}))} \iff \tau = 0.5 \times  \frac{\omega}{\sqrt{2 \times (\alpha - logit(p_{\omega}))}} $$
+with a $p_{\omega}$ usually specified at 0.05 to estimate the suitable range of a species [@michaelis2017].
+
+Those four EHMOS parameters can also be derived from cGLMM coefficient estimates [@jamil2014]:
+
+$$\alpha = \beta_0 - \frac{{\beta_1}^2}{4 \beta_2}$$ 
+
+$$\theta = - \frac{\beta_1}{2 \beta_2}$$
+
+$$\delta = - \frac{\beta_1}{2 \beta_2} - (-\frac{\beta_1 + \beta_4}{2 (\beta_2 + \beta_5)}) $$  
+
+$$\tau = \sqrt{-\frac{1}{2 \beta_2}}$$
+```{r schema_param, fig.cap = "", fig.align='center'}
+
+img <- png::readPNG(here::here("results", "figs", "schema_parameters.png"))
+grid::grid.raster(img)
+
+```
+
+Figure S1: Schematic representation of ecological parameters that describes species-environment relationship.
+
+\newpage
+
+## ESM 2: R script of Bayesian models (EHMOS and cGLMM)  {#esm2}
+### EHMOS
+```{r ehmos_code, echo=FALSE, message=FALSE, warning=FALSE}
+cat("
+model{
+
+  for (i in 1:n){
+  
+    for (t in 1:S){
+    
+      for (j in 1:J){
+      
+        Z[j,i,t] ~ dbern(psi.bound[j, i, t])
+        psi.bound[j, i, t] <- max(0, min(1, psi[j, i, t]))
+        logit(psi[j, i, t]) <- alpha[i, t] -
+                              0.5*pow((alti[j] - (opt[i] + shift[i]*survey[t])) 
+                              / (tol[i, t]), 2) + a.site[j]
+      
+      #creat simulated dataset to calculate the Bayesain p-value
+        Znew[j, i, t] ~ dbern(psi.bound[j, i , t])
+        d[j, i, t] <- abs(Z[j,i,t] - psi.bound[j, i, t])
+        dnew[j, i, t] <- abs(Znew[j, i, t] - psi.bound[j, i, t])
+        d2[j, i, t] <- pow(d[j, i, t], 2)
+        dnew2[j, i, t] <- pow(dnew[j, i, t], 2)
+      } # end for loop index j
+      
+    } # end for loop index t
+    
+    p.fitSP[i] <- sum(d2[1:J,i,1:S])
+    p.fitnewSP[i] <- sum(dnew2[1:J,i,1:S])
+    
+  } # end for loop index i
+  
+  p.fit <- sum(d2[1:J,1:n,1:S])
+  p.fitnew <- sum(dnew2[1:J,1:n,1:S])
+
+for (i in 1:n){
+
+    opt[i] ~ dnorm(opt.mean, tau.opt)#T(-4.42, 3.2)
+    shift[i] ~ dnorm(shift.mean, tau.shift)#T(-1, 1)
+
+    for (t in 1:S){
+
+    	tol[i,t] ~ dnorm(tol.mean[t], tau.tol)T(0.05,)  
+    	alpha[i,t] ~ dnorm(alpha.mean[t], tau.alpha)
+
+    }
+  }
+
+
+for (t in 1:S){
+    tol.mean[t] ~ dnorm(0, 0.001)                        
+    alpha.mean[t] ~ dnorm(0, 0.001) 
+  }
+  
+    opt.mean ~ dnorm(0, 0.001)
+    shift.mean ~ dnorm(0, 0.001)
+
+  
+  for (j in 1:J){
+    a.site[j] ~ dnorm(0, tau.a)
+  }
+  
+  tau.opt ~ dgamma(0.1,0.1)
+  tau.tol ~ dgamma(0.1,0.1)
+  tau.alpha ~ dgamma(0.1,0.1)
+  tau.shift ~ dgamma(0.1,0.1)
+  tau.a ~ dgamma(0.1,0.1)
+  
+}")
+```
+
+### cGLMM
+```{r cglmm_code, , echo=FALSE, message=FALSE, warning=FALSE}
+cat("
+  model{
+    
+    b0.mean ~ dunif(0,1)                          
+    mu.b0 <- log(b0.mean) - log(1-b0.mean)
+    
+    mub1 ~ dnorm(0, 0.001)                        
+    mub2 ~ dnorm(0, 0.001)
+    mub3 ~ dnorm(0, 0.001)
+    mub4 ~ dnorm(0, 0.001)
+    mub5 ~ dnorm(0, 0.001)
+    
+    tau.a ~ dgamma(0.5,0.005)                      
+    tau.b0 ~ dgamma(0.1, 0.1)
+    tau.b1 ~ dgamma(0.1,0.1)                      
+    tau.b2 ~ dgamma(0.1,0.1)
+    tau.b3 ~ dgamma(0.1,0.1)
+    tau.b4 ~ dgamma(0.1,0.1)
+    tau.b5 ~ dgamma(0.1,0.1)
+    
+    for(j in 1:J){
+      a[j] ~ dnorm(0, tau.a) #random site effects
+    }
+    
+    for (i in 1:n) {
+    
+      b0[i] ~ dnorm(mu.b0, tau.b0) 
+      b1[i] ~ dnorm(mub1, tau.b1)               
+      b2[i] ~ dnorm(mub2, tau.b2)
+      b3[i] ~ dnorm(mub3, tau.b3)
+      b4[i] ~ dnorm(mub4, tau.b4)
+      b5[i] ~ dnorm(mub5, tau.b5)
+      
+      #Create a loop to estimate the Z matrix for species i 
+      #at point j.      
+        for (t in 1:S) {
+          for (j in 1:J){
+            Z[j,i,t] ~ dbern(psi.bound[j,i,t])
+            psi.bound[j,i,t]<-max(0,min(1,psi[j,i,t]))
+            logit(psi[j,i,t]) <- b0[i] + 
+                                 b1[i]*alti[j] + 
+                                 b2[i]*pow(alti[j],2) +
+                                 b3[i]*survey[t] + 
+                                 b4[i]*alti[j]*survey[t] + 
+                                 b5[i]*pow(alti[j],2)*survey[t] +
+        		                     a[j]
+        		                     
+            #creat simulated dataset to calculate the Bayesain p-value
+        Znew[j,i,t] ~ dbern(psi.bound[j,i,t])
+        d[j,i,t] <- abs(Z[j,i,t] - psi.bound[j,i,t])
+        dnew[j,i,t] <- abs(Znew[j,i,t] - psi.bound[j,i,t])
+        d2[j,i,t] <- pow(d[j,i,t],2)
+        dnew2[j,i,t] <- pow(dnew[j,i,t],2)
+      }
+        }
+    p.fitSP[i] <- sum(d2[1:J,i,1:S])
+    p.fitnewSP[i] <- sum(dnew2[1:J,i,1:S])
+  }
+  
+  p.fit <- sum(d2[1:J,1:n,1:S])
+  p.fitnew <- sum(dnew2[1:J,1:n,1:S])
+    }"
+)
+```
+
+\newpage
+
+
+### ESM 3: Description of performance metrics used in the simulation study {#esm3}
+
+The four performance metrics used (bias, RMSE, interval coverage and interval score) are computed for each model at different levels (species, scenario, overall). First, for each species $i$ included in a particular scenario $s$, we computed average perfomance metrics over the thirty replications:
+
+* Bias of species $i$ in scenario $s$ based on method $m$ is defined as the average of differences between absolute^[Absolute values are took because true shifts could either be positive or negative, thus a negative bias always represents an underestimation of the true shif magnitude whatever its direction.] estimates based on method $m$ and absolute true shift over the thirty replications:
+
+$$Bias_{i,s,m} = \frac{1}{R} \sum_{r=1}^{R}|\hat{\delta}_{i,s,m,r}| - |\delta_{i,s}| \text{ ;}$$
+
+* The RMSE at species-specific level is defined by:
+
+$$RMSE_{i,s,m} = \sqrt{\frac{1}{R}\sum_{r=1}^{R} (\hat{\delta}_{i,s,m} - \delta_{i,s})^2} \text{ ;}$$
+
+* The interval coverage for a species in a particular scenario is the ratio between the number of replciations in which confidence interval estimate contain the true shift and the total number of replications;
+
+* The interval score of species $i$ in scenario $s$ based on method $m$ is defined as the average of interval scores obtained at each replication $r$. At the replication level, interval score is computed as follows:
+
+\begin{equation*}
+IS_{i,s,m,r}(l_{i,s,m,r}, u_{i,s,m,r}; \delta_{i,s}) = 
+\begin{cases}
+(u_{i,s,m,r}-l_{i,s,m,r}) + \frac{2}{\alpha}(l_{i,s,m,r} - \delta_{i,s}) &\text{if $\delta_{i,s} < l_{i,s,m,r}$}\\
+(u_{i,s,m,r}-l_{i,s,m,r}) &\text{if $u_{i,s,m,r} > \delta_{i,s} > l_{i,s,m,r}$}\\
+(u_{i,s,m,r}-l_{i,s,m,r}) + \frac{2}{\alpha}(\delta_{i,s} - u_{i,s,m,r}) &\text{if $\delta_{i,s} > u_{i,s,m,r}$}
+\end{cases}
+\end{equation*}
+
+where $\alpha$ is the confidence level of the interval, here set at 0.05, $l_{i,s,m,r}$ and $u_{i,s,m,r}$ are the lower and upper limits of the interval estimated by model $m$ for species $i$ in scenario $s$ and replicate $r$. 
+	    
+At the scenario level, metrics are averaged over the twenty species:
+$$\overline{Bias}_{s,m} = \frac{1}{N} \sum_{i=1}^{N} Bias_{i,s,m}$$
+$$\overline{RMSE}_{s,m} = \frac{1}{N} \sum_{i=1}^{N} RMSE_{i,s,m}$$
+$$\overline{Coverage}_{s,m} = \frac{1}{N} \sum_{i=1}^{N} Coverage_{i,s,m}$$
+$$\overline{IS}_{s,m} = \frac{1}{N} \frac{1}{R} \sum_{i=1}^{N} \sum_{r=1}^{R} IS(\hat{l}_{i,s,m,r}, \hat{u}_{i,s,m,r}; \delta_{i,s})$$
+
+\newpage
+
+### ESM 4: Complementary results of the simulation study {#esm4}
+
+```{r convergence_cglmm}
+tabS1 %>%
+  dplyr::bind_cols("pos" = c(5:8, 1:4)) %>%
+  dplyr::arrange(pos) %>%
+  dplyr::select(-pos) %>%
+  kableExtra::kable(format = "latex",
+                    caption = "Number of simulation replications per scenario that at least one model parameter had an R-hat higher than 1.1 after the maximum of iterations was reached", booktabs = TRUE) %>%
+  kableExtra::kable_styling(latex_options = "HOLD_position") %>%
+  kableExtra::pack_rows("Uniform sampling", 1, 4) %>%
+  kableExtra::pack_rows("Unbalanced sampling", 5, 8)
+```
+
+
+```{r computation_time}
+tabS2 %>%
+  dplyr::bind_cols("pos" = c(5:8, 1:4)) %>%
+  dplyr::arrange(pos) %>%
+  dplyr::select(-pos) %>%
+  kableExtra::kable(format = "latex",
+                    caption = "Average computation times in hours.",
+                    booktabs = TRUE,
+                    row.names = NA) %>%
+  kableExtra::kable_styling(latex_options = "HOLD_position") %>%
+  kableExtra::pack_rows("Uniform sampling", 1, 4) %>%
+  kableExtra::pack_rows("Unbalanced sampling", 5, 8)
+```
+
+
+```{r}
+tabS3 %>%
+  dplyr::bind_cols("pos" = rep(c(5:8, 1:4), 4),
+                   "metric" = rep(c("bias", "cov", "is", "rmse"), each = 8)) %>%
+  dplyr::arrange(metric, pos) %>%
+  dplyr::select(-c(pos, metric)) %>%
+  kableExtra::kable(format = "latex",
+                    caption = "Average of species specific performance metrics for the eight simulated scenarios after 30 replications. Numbers in brackets represent standard deviations. ",
+                    booktabs = TRUE,
+                    longtable = TRUE) %>%
+  kableExtra::kable_styling(latex_options = "HOLD_position") %>%
+  kableExtra::pack_rows("Bias", 1, 8) %>%
+  kableExtra::pack_rows("Coverage", 9, 16) %>%
+  kableExtra::pack_rows("IS", 17, 24) %>%
+  kableExtra::pack_rows("RMSE", 25, 32)
+```
+
+
+```{r esm_graph_IS, fig.dim = c(8.3, 11.7), fig.align = 'center', fig.cap=""}
+
+gridExtra::grid.arrange(g.IS, g.IS2, nrow = 2)
+
+```
+
+Figure S2: Distribution of species specific interval scores (IS) for the eight simulated scenarios after 30 replications, and for the three methods (top graph) or without cGLMM (bottom graph). Colored points represent average IS in species group depending on their optimum position (placed in the edge or in the middle of sampling range) along the simulated gradient, and their ecological specialization type relative to the width of their ecological niche (generalist species with broad ecological niche or specialist species with narrower ecological niche).
