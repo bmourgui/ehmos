@@ -2,8 +2,8 @@
 title: "A new method to explicitly estimate the shift of optimum in multispecies studies"
 classoption: a4paper
 output:
-  pdf_document:
   word_document: default
+  pdf_document:
   documentclass: article
 fontsize: 12pt
 header-includes:
@@ -20,7 +20,7 @@ bibliography: Paper_EHMOS.bib
 
 Bastien Mourguiart$^1$, Benoit Liquet$^{1,2}$, Kerrie Mengersen$^{1,3}$, Thibaut Couturier$^4$, Jérôme Mansons$^5$, Yoan Braud$^6$, Aurélien Besnard$^4$ 
 
-$^1$ Laboratoire de Mathématiques et de leurs Application, Université de Pau et des Pays de l'Adour, E2S UPPA, CNRS, Anglet, France  
+$^1$ Laboratoire de Mathématiques et de leurs Applications, Université de Pau et des Pays de l'Adour, E2S UPPA, CNRS, Anglet, France  
 $^2$ Department of Mathematics and Statistics, Macquarie University, Sydney, NSW 2109, Australia  
 $^3$ ARC Centre of Excellence for Mathematical and Statistical Frontiers, School of Mathematical Science, Queensland University of Technology, Brisbane, QLD 4072, Australia  
 $^4$ CEFE, Univ Montpellier, CNRS, EPHE-PSL University, IRD, Univ Paul Valéry Montpellier 3, Montpellier, France  
@@ -119,7 +119,9 @@ We simulated the sampling of a community of 20 species during two sampling occas
 
 We then positioned on the virtual gradient the optima of each species for the two virtual sampling occasions. We defined two optimum sub-scenarios (coded B1 and B2). In optimum sub-scenario B1, 100\% of species had both their optima in the middle of the sampling range, hereafter 'middle species' (green points in Fig. 1), while in B2 30\% of species (six species) were considered as 'edge species', i.e. had their optima close to the boundaries of the sampled gradient (red points in Fig. 1). We defined the middle of the sampling range as the part of the gradient that contains 80\% of the sampling sites (green areas in Fig. 1), the upper and lower parts of the remaining sampling range were considered the sampling edges (orange areas in Fig. 1). We simulated half of the optima of the edge species close to the upper edge, and the other half close to the lower edge. Simultaneously with the optimum of the first sampling occasion (full points in Fig. 1), we simulated the optimum shift, thus obtaining the second optimum (circles in Fig. 1), to respect percentages of edge and middle species in both sampling occasions. For all optimum sub-scenarios, we computed 60\% of upward shifts, 20\% of downward shifts and 20\% of no shift to test all kinds of response while keeping the majority of upward shifts as expected in conditions of ongoing climate change. The values of upward and downward shifts were sampled from a uniform distribution bounded between 80 m and 250 m, and ‑250 m and -80 m respectively.
 
-We used two ecological specialization sub-scenarios (C1 and C2). In sub-scenario C1, we simulated only specialist species, i.e. species having a narrow ecological niche and high maximum occurrence probability. In sub-scenario C2, we simulated 50\% of specialist and 50\% of generalist species having a wider ecological niche and lower maximum occurrence probability than specialist species. We allowed for changes in shape parameters between sampling occasions in both sub-scenarios, but not in ecological specialization type: i.e. a generalist species remains a generalist species, but could have slightly different species response curves in the two sampling occasions. Niche width and maximum occurrence probability were sampled from uniform distributions, independently for the two sampling occasions, with the distribution parameters depending on the ecological specialization type. Specialist species had widths ranging from 400 m and 600 m, while generalists' width ranged between 1200 m and 1400 m. Maximum probability was set between 0.9 and 0.99 for specialist species, and between 0.75 and 0.85 for generalist species. These distribution parameter values were chosen to clearly separate the two types of species and match the values observed in the motivating example. We ran all possible combinations of the sub-scenarios, resulting in eight simulated scenarios. In each, we considered each species to have a symmetric unimodal response curve in both sampling occasions (Fig. 1 bottom panels). We produced site-specific probability of occupancy for each species in each scenario following:
+We used two ecological specialization sub-scenarios (C1 and C2). In sub-scenario C1, we simulated only specialist species, i.e. species having a narrow ecological niche and high maximum occurrence probability. In sub-scenario C2, we simulated 50\% of specialist and 50\% of generalist species having a wider ecological niche and lower maximum occurrence probability than specialist species. We allowed for changes in shape parameters between sampling occasions in both sub-scenarios, but not in ecological specialization type: i.e. a generalist species remains a generalist species, but could have slightly different species response curves in the two sampling occasions. Niche width and maximum occurrence probability were sampled from uniform distributions, independently for the two sampling occasions, with the distribution parameters depending on the ecological specialization type. Specialist species had widths ranging from 400 m and 600 m, while generalists' width ranged between 1200 m and 1400 m. Maximum probability was set between 0.9 and 0.99 for specialist species, and between 0.75 and 0.85 for generalist species. These distribution parameter values were chosen to clearly separate the two types of species and match the values observed in the motivating example. 
+
+We ran all possible combinations of the sub-scenarios, resulting in eight simulated scenarios. In each, we considered each species to have a symmetric unimodal response curve in both sampling occasions (Fig. 1 bottom panels). We produced site-specific probability of occupancy for each species in each scenario following:
 
 $$logit(\psi_{i,j,k}^{s}) = \alpha_{i,k}^{s} - \frac{[\text{X}_j^{s} - (\theta_{i}^{s} + (\text{S}_k \times \delta_{i}^{s}) )]^2}{2 \times {\tau_{i,k}^{s}}^2}$$
 
@@ -179,7 +181,7 @@ B.M., B.L. and A.B. conceived the ideas for this paper; B.M. wrote the manuscrip
 manuscript. 
 
 ## Data availability
-The data and R scripts used to produce this manuscript are available on GitHub.
+The data and R scripts used to produce this manuscript will be available on GitHub and archived on Zenodo before publication.
 
 ## References
 <div id="refs"></div>
@@ -225,6 +227,7 @@ fig3
 ```
 Figure 3: Shift estimates following three statistical methods on 24 Orthoptera species optimum positions between 1980–1988 and 2018–2019 along an elevational gradient in Mercantour National Park (French Alps). The points correspond to the mean estimates and the segments to the associated 95\% credible or confidence intervals. The black horizontal lines represent graphical range, segments reaching those lines indicate intervals wider than the graphical range. Species are ordered by increasing optimum estimates of the first period, species within orange areas are considered as edge species, and those within green areas as middle species. Species names are coloured depending on their ecological type as defined in the simulation study (purple: generalist species and black: specialist species).
 
+\newpage
 
 ## Supporting information
 ## ESM 1: Description of EHMOS' parameters {#esm1}
