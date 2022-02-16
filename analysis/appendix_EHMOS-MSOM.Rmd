@@ -1,0 +1,359 @@
+---
+title: "Appendix - EHMOS in MSOM"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(magrittr)
+```
+
+A quick tutorial to extend the model presented in the manuscript in a MSOM. Demonstration is based only on modern data. It allows the use of MSOM because sampling sites contained five spatial replicates each. Shits between two years 2018 and 2019 are assessed for twenty species. 
+
+## Data
+
+Detection / non-detection data collected in the Mercantour National Park during summer in 2018 and 2019 following sampling design described in @mourguiart2019. 
+
+```{r load data}
+database <- readr::read_delim(here::here("data/BASE_PNM+Ventoux_2018_2019.csv"),
+                            delim = "\t",
+                            escape_double = FALSE,
+                            trim_ws = TRUE)
+```
+
+```{r formatting, echo=FALSE}
+database %>%
+  dplyr::filter(stade != "juvenile") %>% #choice to omit juvenile as it is usually done and that s what probably did Gueguen
+  dplyr::select(-c(operateur, rq_station, rq_ind, data_GPS, abondance, X_WGS84, Y_WGS84)) %>%
+  #omit site with only two plots sampled
+  dplyr::filter(station != "235(pas fini)") %>%
+  #keep just the first fifth plots in sites 625 and A164 on which 10 plots have been sampled
+  dplyr::filter(!(releve %in% c(540:544, 643:647))) %>%
+  #omit phenological test conducted on the site A164 in 2018, keep only the sampling conducted the 9 aug 2018
+  dplyr::filter(!(station == "A164" & date %in% c("23/07/2018", "17/09/2018"))) %>%
+  tidyr::separate(date, c("day", "month", "year"), sep = "/") %>%
+  dplyr::select(station, releve, year, altitude, hauteur, taxon, vu, entendu, fauche) -> data
+
+data[is.na(data)] <- 0
+
+data %>%
+  dplyr::mutate(detection = as.numeric((entendu+vu+fauche)>0)) %>%
+  dplyr::select(station, releve, year, taxon, detection) %>%
+  dplyr::distinct() %>%  #one duplicated row, station 175 releve 621 taxon 'stenobothrus lineatus'
+  tidyr::spread(key=taxon, value=detection) %>%
+  dplyr::select(-c(`Gomphocerinae sp` , `Chorthippus sp`, ZERO_orthoptere)) -> tab # remove un-identified individuals, Gomphocerinae 2 and Chorthippus 1 
+tab[is.na(tab)] <- 0
+tab %>%   
+  dplyr::mutate("Chorthippus scalaris" = (`Chorthippus scalaris` + `Stauroderus scalaris`)) %>% # match names 2018 -2019
+  dplyr::select(-`Stauroderus scalaris`) -> tab
+
+tab[, -c(1, 2, 3)] %>%
+  dplyr::select_if(function(x)sum(x) > 60) -> tab2
+
+cbind(tab[, 1:3], tab2) %>%
+  dplyr::select(-2) -> t
+
+t$rep <- 1
+t <- t[,c(1,ncol(t),2:(ncol(t)-1))]
+for (j in 2:nrow(t)){
+  if(t[j-1,1]==t[j,1])(t[j,"rep"] <- t[j-1,"rep"]+1)
+}
+
+t_site <- t %>%
+  dplyr::select(year, station) %>%
+  dplyr::distinct()
+
+t_site$site <- 1
+for (y in c(2018, 2019)){
+  t_site[t_site$year == y, ]$site <- 1:nrow(t_site[t_site$year == y, ])
+}
+t_site %>%
+  dplyr::inner_join(t, by = c("year", "station")) %>%
+  dplyr::select(- station) %>%
+  tidyr::gather("species","Occ", -c(1:3)) %>%
+  reshape2::melt(id.var=c("species", "site", "rep", "year"), measure.var="Occ") %>%
+  reshape2::acast(site ~ rep ~ species ~ year) -> X 
+
+#X[is.na(X)] <- 0
+K <- apply(X, c(1,3,4), function(x)sum(!is.na(x)))[, 1, ]
+J <- apply(X[,1,1,], c(2), function(x)sum(!is.na(x)))
+
+t_site %>%
+  dplyr::inner_join(data[, c("station", "year", "altitude"), by = c("station", "year")]) %>%
+  dplyr::select(- station) %>%
+  dplyr::group_by(year, site) %>%
+  dplyr::summarise("alti" = mean(altitude)) %>%
+  reshape2::acast(site ~ year) %>%
+  apply(2, scale) -> mat.alti
+
+
+
+t_site %>%
+  dplyr::inner_join(data, by=c("year", "station")) %>%
+  dplyr::filter(!duplicated(releve)) %>%
+  dplyr::select(c(site, releve, year, hauteur)) -> cov.detection
+
+cov.detection$releve <- 1
+cov.detection <- cov.detection[,c(1,ncol(cov.detection),2:(ncol(cov.detection)-1))]
+for (y in c(2018, 2019)) {
+  for (j in unique(cov.detection[cov.detection$year == y, ]$site)){
+    cov.detection[cov.detection$year == y & cov.detection$site == j, ]$releve <- 1:nrow(cov.detection[cov.detection$year == y & cov.detection$site == j, ])
+    }
+}
+
+
+cov.detection %>%
+  tidyr::gather("Cov", "Value", -c(1, 3, 4)) %>%
+  reshape2::melt(id.var=c("Cov", "site", "releve", "year"), measure.var="Value") %>%
+  reshape2::acast(site ~ releve ~ Cov ~ year) -> cov.detection
+#cov.detection[is.na(cov.detection)] <- 0
+
+
+```
+
+
+## EHMOS simple
+### Data
+```{r ehmos data}
+apply(X, c(1, 3, 4), function(x)as.numeric(sum(x, na.rm = TRUE)>0)) -> X.ehmos
+```
+
+### Model
+```{r write model}
+
+cat("
+    model{    
+
+    for (i in 1:nspecies) {
+      for (t in c(1, 2)) {
+        for (j in 1:J[t]){
+          
+          Z[j,i,t] ~ dbern(psi.bound[j,i,t])
+          psi.bound[j,i,t] <- max(0,min(1,psi[j,i,t]))
+          logit(psi[j, i, t]) <- alpha[i, t] - 0.5 * pow(((alti[j, t] - (opt[i] + shift[i] * year[t])) / tol[i, t]), 2)
+        }
+      }
+    }
+  
+
+  for (i in 1:nspecies){
+  
+    opt[i] ~ dnorm(opt.mean, tau.opt)#T(-4.42, 3.2)
+    shift[i] ~ dnorm(shift.mean, tau.shift)#T(-1, 1)
+    
+    for (t in 1:2){
+      tol[i,t] ~ dnorm(tol.mean[t], tau.tol)T(0.05,)  
+      alpha[i,t] ~ dnorm(alpha.mean[t], tau.alpha)
+    }
+    
+    
+  }
+  
+  for (t in 1:2) {
+    alpha.mean[t] ~ dnorm(0, 0.001)
+    tol.mean[t] ~ dnorm(0, 0.001) 
+  }
+  
+   
+  opt.mean ~ dnorm(0, 0.001)  
+  shift.mean ~ dnorm(0, 0.001) 
+  
+  tau.opt ~ dgamma(0.1, 0.1)
+  tau.shift ~ dgamma(0.1, 0.1)
+  tau.tol ~ dgamma(0.1, 0.1)
+  tau.alpha ~ dgamma(0.1, 0.1)
+}
+    ", file = "model_EHMOS.txt")
+
+```
+
+
+
+```{r data model}
+
+alti <- mat.alti
+year <- c(0, 1)
+#hauteur <- scale(cov.detection[, , "hauteur",])
+
+sp.data <- list(nspecies = 20,
+                J = J,
+                Z = X.ehmos,
+                alti = alti,
+                year = year
+                )
+
+## .. 1.3 Specify the parameters to be monitored ####
+sp.params <- c('alpha.mean', 'tau.alpha', 'alpha',
+                'opt.mean', 'tau.opt',  'opt',
+                'tol.mean', 'tau.tol',  'tol',
+                'shift.mean', 'tau.shift',  'shift'
+               )
+
+## .. 1.4. Specify intial values ####
+inits_ehmos <- function() {
+  psi.meanGuess = runif(1, 0, 1)
+  list(alpha = rep(0.7, 20),
+       opt = rep(0, 20),
+       shift = rep(0, 20),
+       tol = rep(0.5, 20),
+       beta = rep(0, 20),
+       gamma = rep(-0.4, 20)
+       )
+}
+
+```
+
+
+```{r run model}
+
+## .. 1.5. Run the model ####
+out_appendix_ehmos <- jagsUI::autojags(data = sp.data,
+                            #inits = inits_ehmos,
+                            parameters.to.save = sp.params,
+                            model.file = "model_EHMOS.txt",
+                            n.chains = 3,
+                            n.adapt = 1000,
+                            n.thin = 10,
+                            n.burnin = 15000,
+                            iter.increment = 20000,
+                            DIC = T,
+                            store.data = T,
+                            Rhat.limit = 1.1,
+                            parallel = T,
+                            max.iter = 100000)
+save(out_appendix_ehmos, file = here::here("results/appendix_out_ehmos.RData"))
+
+```
+
+
+
+
+## EHMOS + MSOM
+
+### Model
+```{r write msom}
+
+cat("
+    model{    
+
+    for (i in 1:nspecies) {
+      for (t in c(1, 2)) {
+        for (j in 1:J[t]){
+          Z[j,i,t] ~ dbern(psi.bound[j,i,t])
+          psi.bound[j,i,t] <- max(0,min(1,psi[j,i,t]))
+          logit(psi[j, i, t]) <- alpha[i, t] - 0.5 * pow(((alti[j, t] - (opt[i] + shift[i] * year[t])) / tol[i, t]), 2)
+          
+          for (k in 1:K[j, t]){
+          
+          X[j,k,i,t] ~ dbern(p.bound[j,k,i,t])
+          p.bound[j,k,i,t] <- p[j,k,i,t] * Z[j, i, t]
+          logit(p[j, k, i, t]) <- gamma[i] + beta[i]*haut[j,k,t]
+          
+          }
+          
+        }
+      }
+    }
+  
+
+  for (i in 1:nspecies){
+  
+    opt[i] ~ dnorm(opt.mean, tau.opt)#T(-4.42, 3.2)
+    shift[i] ~ dnorm(shift.mean, tau.shift)#T(-1, 1)
+    gamma[i] ~ dnorm(gamma.mean, tau.gamma)#T(-1, 1)
+    beta[i] ~ dnorm(beta.mean, tau.beta)#T(-1, 1)
+
+    for (t in 1:2){
+      tol[i,t] ~ dnorm(tol.mean[t], tau.tol)T(0.05,)  
+      alpha[i,t] ~ dnorm(alpha.mean[t], tau.alpha)
+    }
+    
+  }
+  
+  gamma.mean <- log(p.mean/(1-p.mean))
+  p.mean ~ dunif(0, 1)
+  
+  for (t in 1:2){
+    tol.mean[t] ~ dnorm(0, 0.001) 
+    alpha.mean[t] <- log(psi.mean[t]/(1-psi.mean[t]))
+    psi.mean[t] ~ dunif(0, 1)
+  }
+
+  
+  beta.mean ~ dnorm(0, 0.001) 
+  opt.mean ~ dnorm(0, 0.001)  
+  shift.mean ~ dnorm(0, 0.001)
+  
+  tau.opt ~ dgamma(0.1, 0.1)
+  tau.shift ~ dgamma(0.1, 0.1)
+  tau.tol ~ dgamma(0.1, 0.1)
+  tau.alpha ~ dgamma(0.1, 0.1)
+  tau.gamma ~ dgamma(0.1, 0.1)
+  tau.beta ~ dgamma(0.1, 0.1)
+}
+    ", file = "model_EHMOS_MSOM.txt")
+
+```
+
+
+
+```{r data msom}
+
+alti <- mat.alti
+year <- c(0, 1)
+haut <- apply(cov.detection[, , "hauteur",], c(2,3), scale)
+
+sp.data <- list(nspecies = 20,
+                J = J,
+                K = K,
+                X = X,
+                alti = alti,
+                year = year,
+                haut = haut
+                )
+
+## .. 1.3 Specify the parameters to be monitored ####
+sp.params <- c('alpha.mean', 'tau.alpha', 'alpha',
+                'opt.mean', 'tau.opt',  'opt',
+                'tol.mean', 'tau.tol',  'tol',
+                'shift.mean', 'tau.shift',  'shift',
+                'gamma.mean', 'tau.gamma','gamma',
+                'beta.mean', 'tau.beta', 'beta'
+               )
+
+## .. 1.4. Specify intial values ####
+inits_ehmos <- function() {
+  psi.meanGuess = runif(1, 0, 1)
+  list(Z = wx,
+       alpha = out_appendix_ehmos$mean$alpha,
+       opt = out_appendix_ehmos$mean$opt,
+       shift = out_appendix_ehmos$mean$shift,
+       tol = out_appendix_ehmos$mean$tol,
+       gamma = rnorm(20, 0.5, 0.1),
+       beta = rnorm(20, 0, 1)
+       )
+}
+
+```
+
+
+```{r run msom}
+
+## .. 1.5. Run the model ####
+out_appendix_msom <- jagsUI::autojags(data = sp.data,
+                            inits = inits_ehmos,
+                            parameters.to.save = sp.params,
+                            model.file = "model_EHMOS_MSOM.txt",
+                            n.chains = 3,
+                            n.adapt = 10000,
+                            n.thin = 10,
+                            n.burnin = 15000,
+                            iter.increment = 20000,
+                            DIC = T,
+                            store.data = T,
+                            Rhat.limit = 1.1,
+                            parallel = T,
+                            max.iter = 150000)
+save(out_appendix_msom, file = here::here("results/appendix_out_msom.RData"))
+
+```
