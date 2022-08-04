@@ -8,3 +8,5 @@
 manuscript.md
 *.RData
 analysis/not_used
+*.odt
+*.txt
