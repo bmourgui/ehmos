@@ -10,6 +10,10 @@
 #
 ###############################%
 
+source(here::here("R/analysis_functions.R"))
+load(here::here("results/appli_out-ehmos.RData"))
+load(here::here("results/appli_out-glmm.RData"))
+
 #### 1. Graph of SRCs along sampling gradient ####
 ## 1.1. Create SRC for each species and model ----
 occu_appli_ehmos <- pred.ehmos(out = out_appli_ehmos,
@@ -79,7 +83,7 @@ ggplot() +
 plot(out_appli_glmm$sims.list$p.fit ~ out_appli_glmm$sims.list$p.fitnew, xlim=c(800,940), ylim=c(800,940))
 abline(0,1)
 
-plot(out_appli_jamil$sims.list$p.fit ~ out_appli_jamil$sims.list$p.fitnew, xlim=c(800,940), ylim=c(800,940))
+plot(out_appli_ehmos$sims.list$p.fit ~ out_appli_ehmos$sims.list$p.fitnew, xlim=c(800,940), ylim=c(800,940))
 abline(0,1)
 
 p.value_glmm <- 0
@@ -90,13 +94,13 @@ for(s in 1:length(out_appli_glmm$sims.list$p.fit)){
 }
 p.value_glmm <- p.value_glmm/length(out_appli_glmm$sims.list$p.fit)
 
-p.value_jamil <- 0
-for(s in 1:length(out_appli_jamil$sims.list$p.fit)){
-  if(out_appli_jamil$sims.list$p.fit[s]<out_appli_jamil$sims.list$p.fitnew[s]){
-    p.value_jamil <- p.value_jamil + 1
+p.value_ehmos <- 0
+for(s in 1:length(out_appli_ehmos$sims.list$p.fit)){
+  if(out_appli_ehmos$sims.list$p.fit[s]<out_appli_ehmos$sims.list$p.fitnew[s]){
+    p.value_ehmos <- p.value_ehmos + 1
   }
 }
-p.value_jamil <- p.value_jamil/length(out_appli_jamil$sims.list$p.fit)
+p.value_ehmos <- p.value_ehmos/length(out_appli_ehmos$sims.list$p.fit)
 
 
 p.value_glmmSP <- NULL
@@ -111,13 +115,13 @@ for (i in 1:24){
 }
 
 
-p.value_jamilSP <- NULL
+p.value_ehmosSP <- NULL
 for (i in 1:24){
-  p.value_jamilSP[i] <- 0
-  for(s in 1:length(out_appli_jamil$sims.list$p.fit)){
-    if(out_appli_jamil$sims.list$p.fitSP[s,i]<out_appli_jamil$sims.list$p.fitnewSP[s,i]){
-      p.value_jamilSP[i] <- p.value_jamilSP[i] + 1
+  p.value_ehmosSP[i] <- 0
+  for(s in 1:length(out_appli_ehmos$sims.list$p.fit)){
+    if(out_appli_ehmos$sims.list$p.fitSP[s,i]<out_appli_ehmos$sims.list$p.fitnewSP[s,i]){
+      p.value_ehmosSP[i] <- p.value_ehmosSP[i] + 1
     }
   }
-  print(p.value_jamilSP[i]/nrow(out_appli_jamil$sims.list$p.fitSP))
+  print(p.value_ehmosSP[i]/nrow(out_appli_ehmos$sims.list$p.fitSP))
 }
