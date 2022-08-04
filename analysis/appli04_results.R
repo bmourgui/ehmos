@@ -55,7 +55,23 @@ appli_res %>%
   dplyr::mutate("m.width" = (ehmos + glmm + ttest)/3,
                 "is.generalist" = as.factor(m.width > 1200)) -> is_generalist_d
 
+appli_res %>%
+  dplyr::mutate("width" = (width1 + width2) / 2) %>%
+  dplyr::select(sp, model, width) %>%
+  dplyr::mutate("sp" = factor(res_graph$sp,
+                              level = as.character(species_ordered$species))) %>%
+  tidyr::spread(model, width) %>%
+  dplyr::mutate("m.width" = (ehmos + glmm + ttest)/3) %>%
+  dplyr::filter(m.width > 1200) %>%
+  dplyr::select(sp) -> list.generalist
+
 levels(is_generalist_d$is.generalist) <- c("black","purple")
+
+for (i in 1:length(levels(species2))){
+  if (levels(species2)[i] %in% list.generalist$sp){
+    levels(species2)[i] <- paste0(levels(species2)[i], "*")
+  }
+}
 
 ## Create coloured rectangles to distinguish middle from edge species
 rects_app <- data.frame(xstart = c(0,9.5, 22.5),
@@ -79,18 +95,26 @@ res_graph %>%
              position = position_dodge(width = 0.8),
              size = 2
              ) +
-  geom_rect(data = rects_app,
-            aes(xmin = xstart, xmax = xend, ymin = -Inf, ymax = Inf, fill = col),
-            alpha = 0.4) +
+  geom_vline(xintercept = seq(1.5, 23.5, 1), 
+             color = "grey",
+             lty = 3,
+             size = 0.3) +
   ylim(c(-800, 800)) +
-  theme_bw() +
-  theme(axis.text.x = element_text(
-                        size = 16,
-                        angle = -60,
-                        hjust = 0,
-                        colour = as.character(is_generalist_d$is.generalist)
-                        ),
-        axis.title.x = element_blank()) +
+  theme_bw(base_size = 14) +
+  theme(
+    #legend.position = c("top"),
+    legend.box.background = element_rect(color="black"),
+    text = element_text(size = 12),
+        panel.grid.major.x = element_blank(),
+        axis.text.x = element_text(
+          size = 12,
+          angle = -60,
+          hjust = 0,
+          colour = rep(c("orange", "forestgreen", "orange"), c(9,13,2))
+        ),
+        axis.title.x = element_blank(),
+        strip.text.x = element_text(margin = margin(.1, 0, .1, 0, "cm")),
+        axis.ticks.x = element_line(colour = "grey")) +
   ylab("Estimated shift") +
   geom_hline(yintercept = c(-800, 800), lty = 1)  +
   scale_color_manual(values = c("#1B9E77", "#7570B3", "#D95F02"),
@@ -116,3 +140,61 @@ t.test(appli_res[appli_res$model == "ttest", ]$shift,
 t.test(appli_res[appli_res$model == "ttest", ]$shift,
        appli_res[appli_res$model == "ehmos", ]$shift,
        paired = TRUE) -> appli_ttest.vs.ehmos
+
+
+#### Goodness-of-fit (Bayesian p-value) - EHMOS ----
+run.gof <- FALSE
+if (run.gof == TRUE){
+  plot(x = out_appli_ehmos$sims.list$p.fit, 
+       y = out_appli_ehmos$sims.list$p.fitnew,
+       xlab = "p.fit",
+       ylab = "p.fitnew",
+       xlim = range(c(out_appli_ehmos$sims.list$p.fit, out_appli_ehmos$sims.list$p.fitnew)),
+       ylim = range(c(out_appli_ehmos$sims.list$p.fit, out_appli_ehmos$sims.list$p.fitnew)),
+       main = "All species")
+  abline(a = 0, b = 1)
+  par(mfrow = c(4, 6))
+  for (i in 1:24){
+    pfit <- out_appli_ehmos$sims.list$p.fitSP[, i]
+    pfitnew <- out_appli_ehmos$sims.list$p.fitnewSP[, i]
+    bp <- sum(pfit > pfitnew)/length(pfit)
+    plot(x = pfit, 
+         y = pfitnew,
+         xlab = "p.fit",
+         ylab = "p.fitnew",
+         xlim = range(c(pfit, pfitnew)),
+         ylim = range(c(pfit, pfitnew)),
+         main = paste0("species ", i))
+    mtext(text = paste0("bp = ", round(bp, 2)),
+          cex = 0.8)
+    abline(a = 0, b = 1)
+  }
+  
+  
+  #### Goodness-of-fit (Bayesian p-value) - GLMM ----
+  plot(x = out_appli_glmm$sims.list$p.fit, 
+       y = out_appli_glmm$sims.list$p.fitnew,
+       xlab = "p.fit",
+       ylab = "p.fitnew",
+       xlim = range(c(out_appli_glmm$sims.list$p.fit, out_appli_glmm$sims.list$p.fitnew)),
+       ylim = range(c(out_appli_glmm$sims.list$p.fit, out_appli_glmm$sims.list$p.fitnew)),
+       main = "All species")
+  abline(a = 0, b = 1)
+  par(mfrow = c(4, 6))
+  for (i in 1:24){
+    pfit <- out_appli_glmm$sims.list$p.fitSP[, i]
+    pfitnew <- out_appli_glmm$sims.list$p.fitnewSP[, i]
+    bp <- sum(pfit > pfitnew)/length(pfit)
+    plot(x = pfit, 
+         y = pfitnew,
+         xlab = "p.fit",
+         ylab = "p.fitnew",
+         xlim = range(c(pfit, pfitnew)),
+         ylim = range(c(pfit, pfitnew)),
+         main = paste0("species ", i))
+    mtext(text = paste0("bp = ", round(bp, 2)),
+          cex = 0.8)
+    abline(a = 0, b = 1)
+  }
+}
+
