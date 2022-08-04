@@ -224,7 +224,7 @@ sim.data %>%
                                                  Edge = c("Eup", "Edn"))
                 ) -> sim.data
 
-save(list = c("sim.data", "psi", "X_A1", "X_A2"),
+save(list = c("sim.data", "psi", "X_A1", "X_A2", "Z"),
      file = here::here("results", "simulated_data.RData"))
 
 
