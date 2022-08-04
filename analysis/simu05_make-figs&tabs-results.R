@@ -3,7 +3,7 @@
 
 #### 1. Figure 1: Simulation workflow ----
 ## .. 1.1. Define graphic elements that are used multiple times ####
-theme_bw(base_size = 16) +
+theme_bw(base_size = 14) +
   theme(panel.grid = element_blank(),
         legend.position = "none",
         text = element_text(size = 12),
