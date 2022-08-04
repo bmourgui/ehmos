@@ -1,0 +1,52 @@
+---
+title: ""
+classoption: a4paper
+output:
+  pdf_document:
+  word_document: default
+  documentclass: article
+fontsize: 12pt
+header-includes:
+- \usepackage{float}
+- \usepackage{lscape}
+- \usepackage{amsmath}
+- \usepackage{lineno}
+#- \linenumbers
+#- \usepackage{setspace}\doublespacing
+csl: journal-of-biogeography.csl
+bibliography: Paper_EHMOS_cut.bib
+---
+
+## Appendix S2: Description of performance metrics used in the simulation study
+
+The four performance metrics used (bias, RMSE, interval coverage and interval score) are computed for each model at different levels (species, scenario, overall). First, for each species $i$ included in a particular scenario $s$, we computed average perfomance metrics over the thirty replications:
+
+* Bias of species $i$ in scenario $s$ based on method $m$ is defined as the average of differences between absolute^[Absolute values are took because true shifts could either be positive or negative, thus a negative bias always represents an underestimation of the true shif magnitude whatever its direction.] estimates based on method $m$ and absolute true shift over the thirty replications:
+
+$$Bias_{i,s,m} = \frac{1}{R} \sum_{r=1}^{R}|\hat{\delta}_{i,s,m,r}| - |\delta_{i,s}| \text{ ;}$$
+
+* The RMSE at species-specific level is defined by:
+
+$$RMSE_{i,s,m} = \sqrt{\frac{1}{R}\sum_{r=1}^{R} (\hat{\delta}_{i,s,m} - \delta_{i,s})^2} \text{ ;}$$
+
+* The interval coverage for a species in a particular scenario is the ratio between the number of replciations in which confidence interval estimate contain the true shift and the total number of replications;
+
+* The interval score of species $i$ in scenario $s$ based on method $m$ is defined as the average of interval scores obtained at each replication $r$. At the replication level, interval score is computed as follows:
+
+\begin{equation*}
+IS_{i,s,m,r}(l_{i,s,m,r}, u_{i,s,m,r}; \delta_{i,s}) = 
+\begin{cases}
+(u_{i,s,m,r}-l_{i,s,m,r}) + \frac{2}{\alpha}(l_{i,s,m,r} - \delta_{i,s}) &\text{if $\delta_{i,s} < l_{i,s,m,r}$}\\
+(u_{i,s,m,r}-l_{i,s,m,r}) &\text{if $u_{i,s,m,r} > \delta_{i,s} > l_{i,s,m,r}$}\\
+(u_{i,s,m,r}-l_{i,s,m,r}) + \frac{2}{\alpha}(\delta_{i,s} - u_{i,s,m,r}) &\text{if $\delta_{i,s} > u_{i,s,m,r}$}
+\end{cases}
+\end{equation*}
+
+where $\alpha$ is the confidence level of the interval, here set at 0.05, $l_{i,s,m,r}$ and $u_{i,s,m,r}$ are the lower and upper limits of the interval estimated by model $m$ for species $i$ in scenario $s$ and replicate $r$. 
+	    
+At the scenario level, metrics are averaged over the twenty species:
+$$\overline{Bias}_{s,m} = \frac{1}{N} \sum_{i=1}^{N} Bias_{i,s,m}$$
+$$\overline{RMSE}_{s,m} = \frac{1}{N} \sum_{i=1}^{N} RMSE_{i,s,m}$$
+$$\overline{Coverage}_{s,m} = \frac{1}{N} \sum_{i=1}^{N} Coverage_{i,s,m}$$
+$$\overline{IS}_{s,m} = \frac{1}{N} \frac{1}{R} \sum_{i=1}^{N} \sum_{r=1}^{R} IS(\hat{l}_{i,s,m,r}, \hat{u}_{i,s,m,r}; \delta_{i,s})$$
+

@@ -1,0 +1,70 @@
+---
+title: ""
+classoption: a4paper
+output:
+  pdf_document:
+  word_document: default
+  documentclass: article
+fontsize: 12pt
+header-includes:
+- \usepackage{float}
+- \usepackage{lscape}
+- \usepackage{amsmath}
+- \usepackage{lineno}
+#- \linenumbers
+#- \usepackage{setspace}\doublespacing
+csl: journal-of-biogeography.csl
+bibliography: Paper_EHMOS_cut.bib
+---
+
+```{r setup, message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+# set chunk default options for the document
+knitr::opts_chunk$set(echo=FALSE, 
+                      message=FALSE, 
+                      warning=FALSE, 
+                      fig.pos = 'H',
+                      fig.align = 'center')
+```
+
+## Appendix S1: Description of EHMOS' parameters
+
+In the occupancy model of EHMOS (see Eq. (3) in the main text), the four parameters ($\alpha$, $\theta$, $\delta$ and $\tau$) represent ecological descriptors of the species-environment relationship (Fig. S1):
+
+* $\alpha$ corresponds to the maximum probability of occurrence, $\psi_{max}$, on the logit scale. Indeed, the maximum probability of occurrence is reached when gradient value is equal to the optimum, i.e. we have $\psi_j = \psi_{max}$ when $X_j = \theta$. Thus, Eq. (3) in the main text becomes: 
+
+\begin{equation}
+  log(\frac{\psi_{max}}{1-\psi_{max}}) = \alpha \iff \psi_{max}  =   \frac{1}{1+ \exp(-\alpha)};
+\end{equation}
+
+
+* $\theta$ is the species optimum, the environmental value at which species reached its maximum probability of occupancy;
+
+* $\delta$ is the species shift between two optima;
+
+* $\tau$ represents the environmental tolerance of a species, i.e. the gradient range that a species can occupy. It can be related to the width, $\omega$, of the species response curve at a specified occupancy probability threshold, $p_{\omega}$, by:
+
+\begin{equation}
+  \omega = 2 \times \tau \sqrt{2 \times (\alpha - logit(p_{\omega}))} \iff \tau = 0.5 \times  \frac{\omega}{\sqrt{2 \times (\alpha - logit(p_{\omega}))}}
+\end{equation}
+with a $p_{\omega}$ usually specified at 0.05 to estimate the suitable range of a species [@michaelis2017].
+
+Those four EHMOS parameters can also be derived from cGLMM coefficient estimates [@jamil2014]:
+
+\begin{align*}
+  \alpha &= \beta_0 - \frac{{\beta_1}^2}{4 \beta_2} \\
+  \theta &= - \frac{\beta_1}{2 \beta_2} \\
+  \delta &= - \frac{\beta_1}{2 \beta_2} - (-\frac{\beta_1 + \beta_4}{2 (\beta_2 + \beta_5)}) \\
+  \tau &= \sqrt{-\frac{1}{2 \beta_2}}
+\end{align*}
+
+```{r schema_param, fig.cap = "", fig.align='center'}
+
+img <- png::readPNG(here::here("results", "figs", "schema_parameters.png"))
+grid::grid.raster(img)
+
+```
+
+Figure S1.1: Schematic representation of ecological parameters that describes species-environment relationship.
+
+## References
+<div id="refs"></div>

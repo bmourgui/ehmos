@@ -1,0 +1,90 @@
+---
+title: ""
+classoption: a4paper
+output:
+  pdf_document:
+  word_document: default
+  documentclass: article
+fontsize: 12pt
+header-includes:
+- \usepackage{float}
+- \usepackage{lscape}
+- \usepackage{amsmath}
+- \usepackage{caption}
+#- \linenumbers
+#- \usepackage{setspace}\doublespacing
+csl: journal-of-biogeography.csl
+bibliography: Paper_EHMOS_cut.bib
+---
+
+\def\figurename{Figure S}
+\def\tablename{Table S3.}
+
+### Appendix S3: Complementary results of the simulation study
+
+```{r setup, message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+# set chunk default options for the document
+knitr::opts_chunk$set(echo=FALSE, 
+                      message=FALSE, 
+                      warning=FALSE, 
+                      fig.pos = 'H',
+                      fig.align = 'center')
+
+library(knitr)
+library(bookdown)
+source(here::here("make.R"))
+```
+
+```{r convergence_cglmm}
+tabS1 %>%
+  dplyr::bind_cols("pos" = c(5:8, 1:4)) %>%
+  dplyr::arrange(pos) %>%
+  dplyr::select(-pos) %>%
+  kableExtra::kable(format = "latex",
+                    caption = "Number of simulation replications per scenario that at least one model parameter had an R-hat higher than 1.1 after the maximum of iterations was reached", booktabs = TRUE) %>%
+  kableExtra::kable_styling(latex_options = "HOLD_position") %>%
+  kableExtra::pack_rows("Uniform sampling", 1, 4) %>%
+  kableExtra::pack_rows("Unbalanced sampling", 5, 8)
+```
+
+
+```{r computation_time}
+tabS2 %>%
+  dplyr::bind_cols("pos" = c(5:8, 1:4)) %>%
+  dplyr::arrange(pos) %>%
+  dplyr::select(-pos) %>%
+  kableExtra::kable(format = "latex",
+                    caption = "Average computation times in hours.",
+                    booktabs = TRUE,
+                    row.names = NA) %>%
+  kableExtra::kable_styling(latex_options = "HOLD_position") %>%
+  kableExtra::pack_rows("Uniform sampling", 1, 4) %>%
+  kableExtra::pack_rows("Unbalanced sampling", 5, 8)
+```
+
+
+```{r}
+tabS3 %>%
+  dplyr::bind_cols("pos" = rep(c(5:8, 1:4), 4),
+                   "metric" = rep(c("bias", "cov", "is", "rmse"), each = 8)) %>%
+  dplyr::arrange(metric, pos) %>%
+  dplyr::select(-c(pos, metric)) %>%
+  kableExtra::kable(format = "latex",
+                    caption = "Average of species specific performance metrics for the eight simulated scenarios after 30 replications. Numbers in brackets represent standard deviations. ",
+                    booktabs = TRUE,
+                    longtable = TRUE) %>%
+  kableExtra::kable_styling(latex_options = "HOLD_position") %>%
+  kableExtra::pack_rows("Bias", 1, 8) %>%
+  kableExtra::pack_rows("Coverage", 9, 16) %>%
+  kableExtra::pack_rows("IS", 17, 24) %>%
+  kableExtra::pack_rows("RMSE", 25, 32)
+```
+
+
+```{r esm_graph_IS, fig.dim = c(8.3, 11.7), fig.align = 'center', fig.cap=""}
+
+gridExtra::grid.arrange(g.IS, g.IS2, nrow = 2)
+
+```
+
+Figure S3.2: Distribution of species specific interval scores (IS) for the eight simulated scenarios after 30 replications, and for the three methods (top graph) or without cGLMM (bottom graph). Colored points represent average IS in species group depending on their optimum position (placed in the edge or in the middle of sampling range) along the simulated gradient, and their ecological specialization type relative to the width of their ecological niche (generalist species with broad ecological niche or specialist species with narrower ecological niche).

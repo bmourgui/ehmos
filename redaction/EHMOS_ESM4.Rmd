@@ -1,0 +1,294 @@
+---
+title: ""
+classoption: a4paper
+output:
+  pdf_document:
+  word_document: default
+  documentclass: article
+fontsize: 12pt
+header-includes:
+- \usepackage{float}
+- \usepackage{lscape}
+- \usepackage{amsmath}
+- \usepackage{lineno}
+- \linenumbers
+#- \usepackage{setspace}\doublespacing
+csl: journal-of-biogeography.csl
+bibliography: Paper_EHMOS_cut.bib
+---
+
+```{r setup, message=FALSE, warning=FALSE, include=FALSE, paged.print=FALSE}
+# set chunk default options for the document
+knitr::opts_chunk$set(echo=FALSE, 
+                      message=FALSE, 
+                      warning=FALSE, 
+                      fig.pos = 'H',
+                      fig.align = 'center')
+
+source(here::here("analysis/review01_simu_assymetric_curves.R"))
+source(here::here("analysis/review05_make-figs-tabs-results_asymSRC.R"))
+```
+
+# ESM 4: Departure from symmetric assumption
+
+Models used in the manuscript make the assumption that species have symmetric unimodal relationships with environmental gradient (i.e. occupancy probabilities decrease at the same rate on both side of optimum, see Fig. S4.1). Species-environment relationships could however have other forms [@oksanen2002; @jansen2013]. For instance, species response curve (SRC) could be unimodal but skewed to one part of the gradient (i.e. asymmetric). Here we propose to investigate the effect of departure from models' assumption of symmetric unimodal species-gradient relationships on models accuracy by conducting a simulation study.
+
+```{r figure type of SRC, fig.cap = "", fig.align='center'}
+x <- 1000:3000
+y.sym <- src_asym(x = x, opt = 2000, sd_l = 100, sd_r = 100, max = 0.9) # sd chose to simulate a width around 450
+y.asym_l <- src_asym(x = x, opt = 2000, sd_l = 150, sd_r = 100, max = 0.9) 
+y.asym_r <- src_asym(x = x, opt = 2000, sd_l = 100, sd_r = 150, max = 0.9)
+
+# Figure: Representation of the three types of species response curves. 
+data.frame("x" = x,
+           "y" = c(y.sym, y.asym_l, y.asym_r),
+           "toc" = rep(c("1sym", "2asym_l", "2asym_r"), each = length(x))) %>%
+  ggplot(aes(x = x, y = y, col = toc)) +
+  geom_line(aes(linetype = toc),size = 1.5, alpha = 0.6) +
+  geom_segment(aes(x = 2000, xend = 2000, y = 0, yend = 0.9),
+               col = "grey20",
+               lty = 2) +
+  ylim(c(0, 1)) +
+  scale_color_manual(values = c("grey40", "red", "darkgreen"),
+                     labels = c("Symmetric", "Left-skewed", "Right-skewed")) +
+  scale_linetype_manual(values = c(1, 6, 6),
+                        labels = c("Symmetric", "Left-skewed", "Right-skewed")) +
+  labs(color = "Type of SRC",
+       linetype = "Type of SRC") +
+  theme_bw()
+```
+
+Fig S4.1: Three types of species response curves sharing a same optimum (dashed vertical segment).
+
+## Simulated datasets
+
+We defined three potential shapes of species response curves: symmetric, asymmetric with a longer left tail and asymmetric with a longer right tail (Fig. S4.1). We simulated 9 species to describe all possible combinations of SRC that could occur when two sampling occasions are considered (Fig. S4.2). To keep it simple we chose to only simulate specialist species, shifting upward and having their optima of both sampling occasions in the middle of the sampling range. We simulated curve widths ranged from 400 m to 600 m. Maximum occupancy probabilities were obtained by random draws from a uniform distribution bounded between 0.85 and 0.99. Species optima were randomly positioned between 1490 m and 2460 m, in the middle range of the unbalanced sampling design (i.e. sampling scenario A2 of the manuscript). We assigned only upward shifts following random draws from a uniform distribution bounded between 80 and 120 m (Fig. S4.2).
+
+```{r simulated curves, fig.height=10, fig.width=8}
+curve.type1 <- rep(c("Sym", #symmetric
+                        "R-skd", #asymmetric to the right
+                        "L-skd"), #asymmetric to the left
+                      3)
+
+curve.type2 <- rep(c("Sym", #symmetric
+                        "R-skd", #asymmetric to the right
+                        "L-skd"), #asymmetric to the left
+                      each = 3)
+
+par(mfrow = c(3,3))
+for (i in 1:N){
+  plot(X_A1[order(X_A1)], psi[,i,1,1], 
+       type = "l", 
+       xlab = "", ylab = "", 
+       ylim = c(0,1.05),
+       xlim = range(X_A1),
+       col = "blue",
+       main = paste(curve.type1[i],
+                    curve.type2[i]))
+  segments(x0 = data.sp[i, ]$opt,
+           x1 = data.sp[i, ]$opt,
+           y0 = - 1, 
+           y1 = data.sp[i, ]$max.occ1,
+           lty = 2,
+           col = "blue")
+  lines(X_A1[order(X_A1)], psi[,i,2,1],
+        col = "red")
+  segments(x0 = (data.sp[i, ]$opt + data.sp[i, ]$shift),
+           x1 = (data.sp[i, ]$opt + data.sp[i, ]$shift),
+           y0 = - 1, 
+           y1 = data.sp[i, ]$max.occ2,
+           lty = 2,
+           col = "red")
+  text(x = (data.sp[i, ]$opt + data.sp[i, ]$shift / 2),
+       y = 1,
+       labels = paste("+", round(data.sp[i, ]$shift, 0), "m"))
+  arrows(x0 = (data.sp[i, ]$opt),
+         x1 = (data.sp[i, ]$opt + data.sp[i, ]$shift),
+         y0 = 0.95, 
+         y1 = 0.95,
+         length = 0.05)
+}
+```
+
+Fig S4.2: Species response curves of the nine simulated species. Blue curves represent the SRCs of the first sampling occasion. Panel titles indicates the shapes of the two SRCs, with sym, r_skd and l_skd standing for symmetric, right-skewed and left-skewed.
+
+Species response curves were simulated using a mixture of two normal distributions with a common mean and two variance parameters (see Eq. (1) bellow). The common mean represents the species optimum. The two variances are related to the width of the SRC at each side of the species optimum. The first distribution (resp. second) is used to simulate the left (resp. right) side of the optimum of the SRC. Hence, if the first normal distribution has a greater standard deviation than the second normal distribution, the curve will be left-skewed. If both distribution have the same standard deviation, the SRC is symmetric. Note that we used the density function of the normal distribution multiplied by a scaling parameter to reach a specified probability. The scaling parameter is defined as the ratio of the maximum occupancy probability intended and the maximum density of the normal distribution. We simulated the site-specific probability of occupancy for each species as follows:
+
+```{=tex}
+\begin{equation}
+    \psi^s_{i,j,k} =
+    \begin{cases}
+      a_i \frac{exp( - \frac{(x^s_j - (\theta_i + (S_k \times \delta_i)))^2}{2 \sigma_1i ^ 2} )}{\sigma_1i \sqrt{2 \pi}} & \text{for $x^s_j \leq \theta_i$}\\
+      b_i \frac{exp( - \frac{(x^s_j - \theta_i + (S_k \times \delta_i))^2}{2 \sigma_2i ^ 2} )}{\sigma_2i \sqrt{2 \pi}} & \text{for $x^s_j > \theta_i$}
+    \end{cases}
+\end{equation}
+```
+with $a_i$ and $b_i$ the scaling parameters related to the maximum probability, $\theta$ the species optimum, $\delta$ the species shift and $\sigma$ the standard deviations related to the width.
+
+Once SRCs were simulated for each species and sampling occasion, we generated presence/absence data, $Y^s_{i,j,k}$, from random draws of a Bernoulli distribution: $Y^s_{i,j,k} \sim \text{Bernoulli}(\psi^s_{i,j,k})$. We replicated the process 30 times for the two sampling scenarios. Contrary to the manuscript simulation design, here the simulated parameters of the SRCs ($a_i$, $\theta_i$, $\delta_i$, $\sigma_i$) were identical for the two sampling scenarios.
+
+## Accuracy of optimum shift estimates under violiation of the symmetry assumption
+
+In our simulations, all three methods respond in the same way to departure from assumption of symmetric unimodal species-gradient relationships (Fig. S4.3, Table S4.1). More than the departure of symmetry assumption, the models are sensitive to changes in SRC shapes between the two sampling occasions. The more difference between SRC shapes, the larger the bias for all methods. For instance, the highest bias were obtained for species having a SRC skewed toward one side of the gradient at the first sampling occasion and a SRC skewed toward the other side in the next sample (e.g. left-skewed to right-skewed). In contrast, methods produced accurate optimum shift estimates for species having same skewness during the two sampling occasions (e.g. species 5).
+
+```{r include=FALSE}
+full.res.shift %>%
+  dplyr::mutate("abs.bias" = abs(estim.shift - true.shift)) %>%
+  dplyr::group_by(model, scenario) %>%
+  dplyr::summarise_at("abs.bias", c("mean" = mean, "sd" = sd)) -> summary_abs.bias
+
+
+full.res.shift %>%
+  dplyr::mutate("bias" = estim.shift - true.shift) %>%
+  dplyr::filter(sp %in% paste0("sp", c(1, 5, 9))) %>%
+  dplyr::group_by(model, scenario) %>%
+  dplyr::summarise_at("bias", c("mean" = mean, "sd" = sd))
+
+summary_bias %>%
+  dplyr::mutate("mean" = abs(mean)) %>%
+  dplyr::group_by(model, scenario) %>%
+  dplyr::summarise_at("mean", mean)
+
+summary_bias %>%
+  dplyr::filter(sp %in% paste0("sp", c(2, 3, 4, 6, 7, 8))) %>%
+  dplyr::mutate("mean" = abs(mean)) %>%
+  dplyr::group_by(model, scenario) %>%
+  dplyr::summarise_at("mean", mean)
+```
+
+```{r bias table}
+summary_bias %>%
+  dplyr::ungroup() %>%
+  dplyr::inner_join(full.res.shift[, c("sp", "true.shift")], by = "sp") %>%
+  dplyr::distinct() %>%
+  dplyr::mutate("true.shift" = round(true.shift),
+                "bias" = paste0(round(mean), " (", round(sd), ")")) %>%
+  dplyr::select(-c('mean', "sd")) %>%
+  tidyr::pivot_wider(names_from = model, values_from = bias) %>%
+  dplyr::mutate("SRC 1" = rep(rep(c("Symmetric", 
+                                 "Right-skewed", 
+                                 "Left-skewed"), 
+                               3), 2),
+                "SRC 2" = rep(rep(c("Symmetric", 
+                                 "Right-skewed", 
+                                 "Left-skewed"), 
+                               each = 3), 2)) %>%
+  dplyr::rename("True shift" = "true.shift", 
+                "EHMOS" = "ehmos", 
+                "cGLMM" = "glmm", 
+                "t-test" = "t.test")  %>%
+  dplyr::select(c("SRC 1", "SRC 2", "True shift", "EHMOS", "cGLMM", "t-test")) %>%
+  kableExtra::kable(format = "latex",
+                    caption = "Average of bias in optimum shift estimates for the two simulated scenarios after 30 replications. Numbers in brackets represent standard deviations. ",
+                    booktabs = TRUE,
+                    longtable = TRUE) %>%
+  kableExtra::kable_styling(latex_options = "HOLD_position") %>%
+  kableExtra::pack_rows("Sampling scenario A2", 1, 9) %>% # inversion of scenario names during data simulation
+  kableExtra::pack_rows("Sampling scenario A1", 10, 18)
+```
+
+```{r bias figure}
+full.res.shift %>%
+  dplyr::mutate("bias" = (estim.shift - true.shift)) %>%
+  ggplot(aes(x = sp, y = bias)) +
+  geom_point(color = alpha("grey20", 0.4)) +
+  facet_grid(scenario ~ model,
+             labeller = labeller(.rows = c("A1" = "A2", "A2" = "A1"))) + # correct past error of confounding names when creating data
+  geom_point(data = summary_bias,
+             aes(x = sp, y = mean), 
+             color = "red",
+             size = 2) +
+  geom_segment(data = summary_bias,
+               aes(x = sp, 
+                   xend = sp, 
+                   y = mean - sd,
+                   yend = mean + sd), 
+               color = "red") +
+  ylab("Bias (m)") +
+  scale_x_discrete(labels = paste(curve.type1,
+                    curve.type2)) +
+  theme_bw() +
+  theme(axis.text.x = element_text(vjust = 1,
+                                   hjust = 1,
+                                   angle = 45),
+        axis.title.x = element_blank())
+```
+
+Figure S4.3: Bias in optimum shift estimates with simulated species having different kinds of unimodal species response curves (symmetric, right-skewed or left-skewed). Grey points correspond to results from one replication. Mean bias are represented with their standard deviations by red points and red segments.
+
+## Detection of departure from model assumption
+
+We tried two approaches to test the departure from the symmetry assumption made by the three presented models: 1) a Bayesian P-value approach that is often used by ecologists to detect a lack-of-fit in Bayesian models [@conn2018], and 2) a HOF approach previously used to test for the symmetry assumption in range shift studies [@wilson2005].
+
+### Goodness-of-fit
+
+We assess quality of model fit using a Bayesian P-value approach [@gelman2013] for each species. We used the discrepancy measure defined by @zipkin2009: $D(y_i) = \sum_{k}(y_{ik} - \hat\psi_{ik})^2$ for the presence-absence observations $y_{ik}$ of species $i$ and their expected values $\hat\psi_{ik}$ under the model at MCMC replication $k$. This discrepancy statistic is computed independently for each species $i$. A reference distribution is computed by simulating data sets from the posterior distribution, $y_{ik}^{sim} \sim p(\theta_{ik} | y)$, and computing the discrepancy measure, $D(y_{ik}^{sim})$, for the simulated data sets. The Bayesian p-value for species $i$ is defined as the probability: $p_{Bi} = \text{Pr}(D(y_i)>D(y_i^{sim}))$. Extreme values (e.g. less than 0.05 or greater than 0.95) are interpreted as a lack of fit. 
+
+```{r table GoF}
+data.frame("SRC 1" = rep(c("Symmetric", 
+                                 "Right-skewed", 
+                                 "Left-skewed"), 
+                               3),
+                "SRC 2" = rep(c("Symmetric", 
+                                 "Right-skewed", 
+                                 "Left-skewed"), 
+                               each = 3),
+           "cGLMM" = apply(bp.sp_glmm, 1, function(x)(sum(x < 0.05 | x > 0.95))),
+           "EHMOS" = apply(bp.sp_ehmos, 1, function(x)(sum(x < 0.05 | x > 0.95)))) %>%
+  kableExtra::kable(format = "latex",
+                    caption = "Number of times where lack-of-fit were detected after 30 replications for the 9 species simulated with different shapes of response.",
+                    booktabs = TRUE,
+                    longtable = TRUE) %>%
+  kableExtra::kable_styling(latex_options = "HOLD_position")
+``` 
+
+We detected no lack-of-fit according to the Bayesian p-value approach, except for one species in one replication of the simulation (Table S4.2). 
+
+Bayesian p-value approach seems conservative in regards of skewed species response. Thus, it should not be used to investigate departure from model assumption on shape of species response.
+
+### HOF approach
+
+HOF approach consists in applying seven models and select the model that best fit the data [@huisman1993; @jansen2013]. The five models describe five shapes of response curves assumed to be ecologically meaningful [@oksanen2002; @jansen2013]: I) flat, II) monotone, III) plateau, IV) unimodal symmetric, V) unimodal skewed, VI) bimodal symmetric and VII) bimodal skewed. This approach has been used to determine the shape of species response along environmental gradients in many studies [e.g. @oksanen2002; @jansen2013; @michaelis2017], and especially in range shift studies [@urli2014, @wilson2005]. For instance, @wilson2005 used the HOF approach to verify the assumption of symmetrical species response curves made by their two-GLMs approach. We tested this method on our simulated data sets. We applied the HOF approach on each replicated data set and each species for sampling occasion one using the `HOF` function of the R-package `eHOF` [@jansen2013].
+
+```{r}
+shape.hat %>% 
+  as.data.frame() %>% 
+  dplyr::mutate_all(as.factor) %>% 
+  tidyr::pivot_longer(cols = 1:9,
+                      names_to = "species",
+                      values_to = "hof_shape") %>%
+  dplyr::group_by(species) %>%
+  dplyr::count(hof_shape) %>%
+  tidyr::pivot_wider(names_from = "hof_shape",
+                     values_from = "n") %>%
+  dplyr::ungroup() -> hof_res
+
+hof_res[is.na(hof_res)] <- 0
+
+hof_res %>%
+  dplyr::mutate("species" = 1:9,
+                "true shape" = rep(c("Symmetric (IV)", 
+                                 "Right-skewed (V)", 
+                                 "Left-skewed (V)"), 
+                               3)) %>%
+  dplyr::select(1, 5, 2:4) %>%
+  kableExtra::kable(format = "latex",
+                    caption = "Model choices of the HOF approach for the 9 simulated species after 30 replications.",
+                    booktabs = TRUE,
+                    longtable = TRUE) %>%
+  kableExtra::add_header_above(c(" " = 2, "HOF models" = 3))
+```
+
+The HOF approach failed to retrieve the correct shape for numerous species and iterations (Table S4. 3). It estimated symmetrical response in majority of replications even for species having skewed response. Species with symmetrical responses had been misclassified in at least 15\% of the replications. 
+
+## Discussion
+
+We found that departure from assumption of symmetry in species response could induce bias in optimum shift estimates of the three methods. The estimates were biased when degree of skewness in species response changed between the two sampling occasions. Thus, readers should be cautious regarding the shape of species response curves, and more importantly in the potential changes in shapes of SRC between the samples studied, before applying any of the three methods presented here. 
+
+We tried two approaches in order to detect departure from model assumption of symmetry in SRC: 1) Bayesian p-value approach as a measure of goodness-of-fit [@gelman2013] and 2) HOF approach that were used by @wilson2005 in this context. None was found to be a reliable evaluation of the symmetry assumption based on our simulations. This could be due to the relatively low degree of skewness of the simulated SRCs, but previous works have also shown that HOF approach could misclassify SRC shapes even with high degree of skewness [@jansen2013; @michaelis2017]. @jansen2013 found for instance that HOF approach could be sensitive to optimum position along the environmental gradient. Their results indicate numerous misclassifications of HOF approach (see Table 4 and Fig. A3 in @jansen2013), especially (but not only) for species having their optimum close to sampling limits (i.e. edge species). These results also stand for GAMs [@jansen2013; @citores2020]. Besides, @oksanen2002 pointed out that defining symmetry or asymmetry with GAMs could be subjective and thus advice to use of HOF approach. For these reasons we do not used GAMs for testing the symmetry assumption.
+
+## Conlusion
+
+It appears important to thoroughly inspect SRC shape before analysis due to potential bias when SRC shapes change over sampling occasions. More researches are needed to be able to test for asymmetrical SRC, especially simulation studies. Ecologists could also rely on more precise data, e.g. abundance data, when they are available to test the assumption of symmetrical speceis response curves.
+
+## References
