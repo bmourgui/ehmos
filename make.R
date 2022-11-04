@@ -17,6 +17,9 @@ library(magrittr)
 # Load all functions
 devtools::load_all()
 
+#### Create a folder to save results ----
+dir.create("results")
+
 #### File states ----
 # Indicate if long-time-to-run files have changed
 # Code below will be executed in consequence
