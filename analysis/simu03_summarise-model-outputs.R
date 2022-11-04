@@ -85,7 +85,7 @@ for (s in unique(full.res.shift$scenario)) {
     full.res.shift[full.res.shift$scenario == s & full.res.shift$replication==r & full.res.shift$model == "glmm", "time"] <- out.glmm$mcmc.info$elapsed.mins
 
     full.res.shift[full.res.shift$scenario == s & full.res.shift$replication==r & full.res.shift$model == "ehmos", c("estim.shift", "lwr.shift", "upr.shift")] <- t(apply(shift.ehmos, 2, function(y)quantile(y, c(0.5,0.025,0.975))))
-    full.res.shift[full.res.shift$scenario == s & full.res.shift$replication==r & full.res.shift$model == "t.test", c("lwr.shift", "estim.shift", "upr.shift")] <- t(apply(z, 2, function(y)mean.method2(z=y, alti=x)))[,1:3]
+    full.res.shift[full.res.shift$scenario == s & full.res.shift$replication==r & full.res.shift$model == "t.test", c("lwr.shift", "estim.shift", "upr.shift")] <- t(apply(z, 2, function(y)mean.method2(z=y, env=x)))[,1:3]
     full.res.shift[full.res.shift$scenario == s & full.res.shift$replication==r & full.res.shift$model == "glmm", c("estim.shift", "lwr.shift", "upr.shift")] <- t(apply(shift.glmm, 2, function(y)quantile(y, c(0.5,0.025,0.975))))
   }
 }
