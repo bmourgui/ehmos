@@ -14,6 +14,8 @@ knitr::opts_chunk$set(
 Title <- "A new method to explicitly estimate the shift of optimum along gradients in multispecies studies"
 ```
 
+# Explicit Hierarchical Model of Optimum Shifts (EHMOS)
+
 This repository contains the data and code for our paper submitted to _Journal of Biogeography_:
 
 > B. Mourguiart, B. Liquet, K. Mengersen, T. Couturier, J. Mansons, Y. Braud, A. Besnard , (under revision). _`r Title`_. 
