@@ -37,28 +37,27 @@ if (simu01 == "ok"){
 }
 
 
-#### 1.2 - fit models & 1.3. - summarise outputs ----
+#### 1.2 - fit models
 ## GLMM
 if (simu02.glmm == "ok"){
-  if (simu03 == "ok"){
-    load(here::here("results", "simu_res-summary.RData"))
-  }else{
-    load(here::here("results", "simu_out-glmm.RData"))
-    source(here::here("analysis", "simu03_summarise-model-outputs.R"))
-  }
+  load(here::here("results", "simu_out-glmm.RData"))
 }else{
   source(here::here("analysis", "simu02_run-GLMM.R"))
 }
 ## EHMOS
 if (simu02.ehmos == "ok"){
-  if (simu03 == "ok"){
-    load(here::here("results", "simu_res-summary.RData"))
-  }else{
-    load(here::here("results", "simu_out-ehmos.RData"))
-    source(here::here("analysis", "simu03_summarise-model-outputs.R"))
-  }
+  load(here::here("results", "simu_out-ehmos.RData"))
 }else{
   source(here::here("analysis", "simu02_run-EHMOS.R"))
+}
+
+## 1.3. Summarise outputs
+if (simu03 == "ok"){
+  load(here::here("results", "simu_res-summary.RData"))
+}else{
+  load(here::here("results", "simu_out-ehmos.RData"))
+  load(here::here("results", "simu_out-glmm.RData"))
+  source(here::here("analysis", "simu03_summarise-model-outputs.R"))
 }
 
 #### 1.4 - Compute performance metrics ----
