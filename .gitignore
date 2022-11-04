@@ -10,7 +10,4 @@ manuscript.md
 analysis/not_used
 *.odt
 *.txt
-README.Rmd
-README.md
-*.md
 *.tex
