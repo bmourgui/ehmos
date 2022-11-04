@@ -10,7 +10,7 @@
 
 set.seed(44)
 
-alti.sc <- scale(alti, center = TRUE, scale = TRUE)
+alti.sc <- as.numeric(scale(alti, center = TRUE, scale = TRUE))
 
 #### 1. EHMOS ----
 
@@ -105,20 +105,20 @@ inits_ehmos <- function() {
 }
 
 ## .. 1.5. Run the model ####
-out_appli_ehmos <- autojags(data = sp.data,
-                            inits = inits_ehmos,
-                            parameters.to.save = sp.params,
-                            model.file = "mod_EHMOS.txt",
-                            n.chains = 3,
-                            n.adapt = 1000,
-                            n.thin = 10,
-                            n.burnin = 15000,
-                            iter.increment = 15000,
-                            DIC = T,
-                            store.data = T,
-                            Rhat.limit = 1.1,
-                            parallel = T,
-                            max.iter = 150000)
+out_appli_ehmos <- jagsUI::autojags(data = sp.data,
+                                    inits = inits_ehmos,
+                                    parameters.to.save = sp.params,
+                                    model.file = "mod_EHMOS.txt",
+                                    n.chains = 3,
+                                    n.adapt = 1000,
+                                    n.thin = 10,
+                                    n.burnin = 15000,
+                                    iter.increment = 15000,
+                                    DIC = T,
+                                    store.data = T,
+                                    Rhat.limit = 1.1,
+                                    parallel = T,
+                                    max.iter = 150000)
 ## .. 1.6. Save outputs ####
 save(out_appli_ehmos,
      file = here::here("results", "appli_out-ehmos.RData"))
@@ -212,20 +212,21 @@ inits_glmm <- function() {
 }
 
 ## .. 2.4. Run the model ####
-out_appli_glmm <- autojags(data = sp.data,
-                           inits = inits_glmm,
-                           parameters.to.save = params_glmm,
-                           model.file = "mod_glmm.txt",
-                           n.chains = 3,
-                           n.adapt = 1000,
-                           n.thin = 10,
-                           n.burnin = 15000,
-                           iter.increment = 15000,
-                           DIC = T,
-                           store.data = T,
-                           Rhat.limit = 1.1,
-                           parallel = T,
-                           max.iter = 150000)
+out_appli_glmm <- jagsUI::autojags(data = sp.data,
+                                   inits = inits_glmm,
+                                   parameters.to.save = params_glmm,
+                                   model.file = "mod_glmm.txt",
+                                   n.chains = 3,
+                                   n.adapt = 1000,
+                                   n.thin = 10,
+                                   n.burnin = 15000,
+                                   iter.increment = 15000,
+                                   DIC = T,
+                                   store.data = T,
+                                   Rhat.limit = 1.1,
+                                   parallel = T,
+                                   max.iter = 150000)
+
 ## .. 2.5. Save outputs ####
 save(out_appli_glmm,
      file = here::here("results", "appli_out-glmm.RData"))
