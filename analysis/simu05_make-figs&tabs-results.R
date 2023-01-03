@@ -3,10 +3,10 @@
 
 #### 1. Figure 1: Simulation workflow ----
 ## .. 1.1. Define graphic elements that are used multiple times ####
-theme_bw(base_size = 14) +
+theme_bw(base_size = 8) +
   theme(panel.grid = element_blank(),
         legend.position = "none",
-        text = element_text(size = 12),
+        text = element_text(size = 8),
         strip.text.x = element_text(margin = margin(.1, 0, .1, 0, "cm"))) -> th # general theme
 
 rects <- data.frame(xstart = c(1000,
