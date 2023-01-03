@@ -100,14 +100,14 @@ res_graph %>%
              lty = 3,
              size = 0.3) +
   ylim(c(-800, 800)) +
-  theme_bw(base_size = 14) +
+  theme_bw() +
   theme(
     #legend.position = c("top"),
     legend.box.background = element_rect(color="black"),
-    text = element_text(size = 12),
+    text = element_text(size = 8),
         panel.grid.major.x = element_blank(),
         axis.text.x = element_text(
-          size = 12,
+          size = 8,
           angle = -60,
           hjust = 0,
           colour = rep(c("orange", "forestgreen", "orange"), c(9,13,2))
@@ -129,8 +129,9 @@ res_graph %>%
 
 ggsave(filename = here::here("results", "figs", "fig3.png"),
        plot = fig3,
-       height = 8.3,
-       width = 11.7)
+       height = 140,
+       width = 168,
+      units = "mm")
 
 #### Paired t-test between method estimates ----
 t.test(appli_res[appli_res$model == "ttest", ]$shift,
