@@ -74,7 +74,7 @@ Of all the simulated scenarios, EHMOS was the most accurate method. GLMM was the
 The case study results obtained with EHMOS were consistent with what is expected considering ongoing climate change, with mostly upward shifts, which further improved confidence in the accuracy of the EHMOS method.
 
 ### Main conclusions
-Our findings indicate that EHMOS could be used for a wide range of topics and extended to produce new insights, especially in climate change studies. Explicit estimation of optimum shifts notably allows investigation of ecological assumptions that could explain interspecific variability of these shifts.
+EHMOS could be used for a wide range of topics and extended to produce new insights, especially in climate change studies. Explicit estimation of optimum shifts notably allows investigation of ecological assumptions that could explain interspecific variability of these shifts.
 
 
 **Keywords:** Bayesian hierarchical modelling, Generalized Linear Mixed Model (GLMM), mean comparison method, optimum shift, sampling design, species distribution, species ecological specialization, species response curve  
