@@ -162,8 +162,9 @@ gridExtra::grid.arrange(g_subscenarA,
 ## .. 1.7. Save figure 1 ####
 ggsave(filename = here::here("results", "figs", "fig1.png"),
        plot = fig1,
-       height = 8.3,
-       width = 11.7)
+       height = 190,
+       width = 168,
+       units = "mm")
 
 
 
@@ -202,8 +203,9 @@ ggpubr::ggarrange(g.RMSE,
 ## .. 2.6. Save figure 2 ####
 ggsave(filename = here::here("results", "figs", "fig2.png"),
        plot = fig2,
-       height = 8.3,
-       width = 11.7)
+       height = 190,
+       width = 168,
+       units = "mm")
 
 
 #### 3. Table 1: Interval scores by scenario ----
