@@ -23,7 +23,7 @@ bibliography: Paper_EHMOS_cut.bib
 Bastien Mourguiart$^{1*}$, Benoit Liquet$^{1,2}$, Kerrie Mengersen$^{1,3}$, Thibaut Couturier$^4$, Jérôme Mansons$^5$, Yoan Braud$^6$, Aurélien Besnard$^4$ 
 
 $^1$ Laboratoire de Mathématiques et de leurs Applications, Université de Pau et des Pays de l'Adour, E2S UPPA, CNRS, Anglet, France  
-$^2$ Department of Mathematics and Statistics, Macquarie University, Sydney, NSW 2109, Australia  
+$^2$ School of Mathematical and Physical Sciences, Macquarie University, Sydney, NSW92109, Australia 
 $^3$ ARC Centre of Excellence for Mathematical and Statistical Frontiers, School of Mathematical Science, Queensland University of Technology, Brisbane, QLD 4072, Australia  
 $^4$ CEFE, Univ Montpellier, CNRS, EPHE-PSL University, IRD, Univ Paul Valéry Montpellier 3, Montpellier, France  
 $^5$ Parc National du Mercantour, Nice, France  
