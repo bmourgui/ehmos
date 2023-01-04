@@ -153,11 +153,10 @@ occu %>%
   grect -> g_scenar
 
 ## .. 1.6. Final graph ####
-gridExtra::grid.arrange(g_subscenarA,
-                        g_subscenarB,
-                        g_subscenarC,
-                        g_scenar,
-                        nrow = 4) -> fig1
+cowplot::plot_grid(g_subscenarA, g_subscenarB, g_subscenarC, g_scenar, 
+                   nrow=4,
+                   labels=c("(a)", "(b)","(c)","(d)"),
+                   label_size = 8) -> fig1
 
 ## .. 1.7. Save figure 1 ####
 ggsave(filename = here::here("results", "figs", "fig1.png"),
