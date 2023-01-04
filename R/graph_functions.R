@@ -13,7 +13,7 @@ library(ggplot2)
 ggtheme <- function(g){
   g +
     theme_bw() +
-    theme(text = element_text(size=11) ,
+    theme(text = element_text(size=8) ,
           axis.title.x = element_blank(),
           legend.position = "none") +
     scale_fill_manual(values = c("#1B9E77", "#D95F02"),
