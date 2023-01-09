@@ -1,17 +1,13 @@
 ############################################%
-# Simulate data for EHMOS paper
+# Simulating Optimum Shifts for Multiple Species
 #
-# last modification: 09/12/21 (edit annotations)
-# bastien.mourguiart@gmail.com
 #
-# SIMU_data-simulation.R
-#
-# Script to create virtual presence/absence data
+# Script to create virtual presence/absence datasets for 20 virtual species
 # used in the simulation study in the paper about optimum shifts.
 #
 # Simulate eight scenarios that result of the combination of three sub scenarios
 # each decomposed in two categories.
-# Outputs are true ecological parameters for each species (especially true shifts),
+# Outputs are known ecological parameters for each species (especially true shifts),
 # one occupancy data set per scenario, and 30 pres/abs dataset per scenario
 ############################################%
 
@@ -21,9 +17,9 @@ set.seed(1904) #set a seed for replicability
 ## Set the number of sites and species ##
 J <- 300
 N <- 20
-sim.data <- data.frame("scenario" = rep(c("A1xB1xE1", # scenario names had evolved during the work, E1 became C1 after
-                                          "A1xB2xE1", # at the start E1 refers to Ecological sub-scenario 1
-                                          "A1xB1xE2", # but became C1 for simplicity and match with A & B
+sim.data <- data.frame("scenario" = rep(c("A1xB1xE1", # scenario names had evolved during the work
+                                          "A1xB2xE1", # at first E1 referred to Ecological sub-scenario 1 in this part of code
+                                          "A1xB1xE2", # but became C1 in the writting for simplicity
                                           "A1xB2xE2",
                                           "A2xB1xE1",
                                           "A2xB2xE1",
