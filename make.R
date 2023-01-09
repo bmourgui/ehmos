@@ -1,35 +1,31 @@
 ############################################%
 # Run all the workflow
-#
-# last modification: 15/12/21 (create file)
-# bastien.mourguiart@gmail.com
-#
-# file name: make.R
-#
 ############################################%
 
 #### Charge packages and functions ----
-# Packages that we are forced to be loaded
 library(ggplot2)
 library(magrittr)
 ####
 
 # Load all functions
-devtools::load_all()
+source(here::here("R", "analysis_functions.R"))
+source(here::here("R", "graph_functions.R"))
 
-#### Create a folder to save results ----
+#### Create folders to save results ----
 dir.create("results")
+dir.create(here::here("results", "figs"))
+dir.create(here::here("results", "tables"))
 
 #### File states ----
 # Indicate if long-time-to-run files have changed
 # Code below will be executed in consequence
-simu01 <- "ok"
+simu01 <- "no"
 simu02.glmm <- "ok"
 simu02.ehmos <- "ok"
-simu03 <- "ok"
-simu04 <- "ok"
+simu03 <- "no"
+simu04 <- "no"
 
-appli02 <- "ok"
+appli02 <- "no"
 
 #### 1. Execute the workflow for simulation analysis ----
 #### 1.1 - simulate the data ----
@@ -73,7 +69,7 @@ if (simu04 == "ok"){
 source(here::here("analysis", "simu05_make-figs&tabs-results.R"))
 
 
-#### 2. Execute workflow for application analysis ----
+#### 2. Execute workflow for the case study ----
 #### .. 2.1. Data formatting ----
 source(here::here("analysis", "appli01_formatting-data.R"))
 
