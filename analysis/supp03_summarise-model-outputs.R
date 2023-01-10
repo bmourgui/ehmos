@@ -1,14 +1,8 @@
-############################################%
-# Summarise model outputs
-#
-# last modification: 09/12/21 (edit annotations)
-# bastien.mourguiart@gmail.com
-#
-# simu03_summarise-model-outputs.R
-#
-# Script to summarise model outputs
-# Format data for visualization
-############################################%
+# R code for the supplementary simulation study in:
+# A new method to explicitly estimate the shift of optimum along gradients in multispecies studies.
+# B. Mourguiart, B. Liquet, K. Mengersen, T. Couturier, J. Mansons, Y. Braud, A. Besnard
+
+# Script 3: Compute summary statistics of models' outputs
 
 library(magrittr)
 
