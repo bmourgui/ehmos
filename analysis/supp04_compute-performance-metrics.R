@@ -1,15 +1,8 @@
-############################################%
-# Calculate performance metrics
-#
-# last modification: 09/12/21 (edit annotations)
-# bastien.mourguiart@gmail.com
-#
-# simu04_compute-performance-metrics.R
-# depends on: simu03_summarise-model-outputs.R
-#
-# Script to calculate performance metrics based
-# on summarized model outputs
-############################################%
+# R code for the supplementary simulation study in:
+# A new method to explicitly estimate the shift of optimum along gradients in multispecies studies.
+# B. Mourguiart, B. Liquet, K. Mengersen, T. Couturier, J. Mansons, Y. Braud, A. Besnard
+
+# Script 4: Calculate performance metrics (e.g., RMSE) of models
 
 
 ## Add contrain.true column that will be used to calculate
