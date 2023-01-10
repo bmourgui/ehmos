@@ -1,13 +1,8 @@
-############################################%
-# Formatting application data
-#
-# last modification: 16/12/21 (create file)
-# bastien.mourguiart@gmail.com
-#
-# file name: appli01_formatting-data.R
-#
-############################################%
+# R code for the application study in:
+# A new method to explicitly estimate the shift of optimum along gradients in multispecies studies.
+# B. Mourguiart, B. Liquet, K. Mengersen, T. Couturier, J. Mansons, Y. Braud, A. Besnard
 
+# Script 1: Load species occurrence data and format them prior to model fitting
 
 
 database <- readr::read_delim(here::here("data/BASE_PNM+Ventoux_2018_2019.csv"),
