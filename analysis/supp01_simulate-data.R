@@ -1,3 +1,9 @@
+# R code for the supplementary simulation study in:
+# A new method to explicitly estimate the shift of optimum along gradients in multispecies studies.
+# B. Mourguiart, B. Liquet, K. Mengersen, T. Couturier, J. Mansons, Y. Braud, A. Besnard
+
+# Script 1: Simulate occurrence data
+# Virtual species can have symmetrical and asymmetrical responses
 
 library(magrittr)
 library(ggplot2)
