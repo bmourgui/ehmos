@@ -1,12 +1,8 @@
-############################################%
-# Fit models to application data
-#
-# last modification: 16/12/21 (create file)
-# bastien.mourguiart@gmail.com
-#
-# file name: appli02_formatting-data.R
-#
-############################################%
+# R code for the application study in:
+# A new method to explicitly estimate the shift of optimum along gradients in multispecies studies.
+# B. Mourguiart, B. Liquet, K. Mengersen, T. Couturier, J. Mansons, Y. Braud, A. Besnard
+
+# Script 2: Fit Bayesian models to Orthoptera data
 
 set.seed(44)
 
