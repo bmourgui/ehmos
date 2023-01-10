@@ -1,3 +1,8 @@
+# R code for the supplementary simulation study in:
+# A new method to explicitly estimate the shift of optimum along gradients in multispecies studies.
+# B. Mourguiart, B. Liquet, K. Mengersen, T. Couturier, J. Mansons, Y. Braud, A. Besnard
+
+# Script 5: Produce results
 
 library(ggplot2)
 library(magrittr)
