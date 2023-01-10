@@ -24,8 +24,8 @@ This folder contains all R scripts needed to reproduce the results of the simula
 
 - simu
   - simu01_simulate-data.R: simulate the occurrence data for the 20 virtual species studied in the simulation study.
-  - simu02-run-EHMOS.R: code to fit the Explicit Hierarchical Model of Optimum Shifts (EHMOS) to the simulated data. Instead of running this script which can take several days to run, the model's outputs (MCMC samples) used to produce the results in the paper can be download at: . 
-  - simu02-run-GLMM.R: code to fit the GLMM to the simulated data. Instead of running this script which can take several days to run, the model's outputs (MCMC samples) used to produce the results in the paper can be download at: . 
+  - simu02-run-EHMOS.R: code to fit the Explicit Hierarchical Model of Optimum Shifts (EHMOS) to the simulated data. Instead of running this script which can take several days to run, the model's outputs (MCMC samples saved in *simu_out-ehmos.RData*) used to produce the results in the paper can be download at: . 
+  - simu02-run-GLMM.R: code to fit the GLMM to the simulated data. Instead of running this script which can take several days to run, the model's outputs (MCMC samples saved in *simu_out-glmm.RData*) used to produce the results in the paper can be download at: . 
   - simu03_summarise-model-outputs.R: transforms models' outputs (MCMC samples) in a summary dataframe containing optimum shift estimates for each species, models, scenarios and replications. 
   - simu04_compute-performance-metrics.R: computes performance metrics (e.g., bias)  for each species, models, scenarios and replications. 
   - simu05_make-figs&tabs-results.R: creates figures and tables presented in the main paper and supplementary materials. 
