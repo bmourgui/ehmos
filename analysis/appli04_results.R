@@ -1,12 +1,8 @@
-############################################%
-# Results analysis presented in the manuscript
-#
-# last modification: 16/12/21 (create file)
-# bastien.mourguiart@gmail.com
-#
-# file name: appli04_results.R
-#
-############################################%
+# R code for the application study in:
+# A new method to explicitly estimate the shift of optimum along gradients in multispecies studies.
+# B. Mourguiart, B. Liquet, K. Mengersen, T. Couturier, J. Mansons, Y. Braud, A. Besnard
+
+# Script 4: Create results presented in the manuscript
 
 
 #### Averaging results ----
@@ -127,7 +123,7 @@ res_graph %>%
                     name = "Optimum type",
                     labels = c("Middle", "Edge")) -> fig3
 
-ggsave(filename = here::here("results", "figs", "fig3.png"),
+ggsave(filename = here::here("results", "figs", "fig3.pdf"),
        plot = fig3,
        height = 140,
        width = 168,
