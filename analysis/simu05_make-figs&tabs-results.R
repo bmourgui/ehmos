@@ -299,7 +299,7 @@ perf_sp %>%
   ggnested(ylab = "Interval score") %>%
   ggtheme() -> g.IS2
 
-figS2 <- gridExtra::grid.arrange(g.IS, g.IS2, nrow = 2)
+figS2 <- ggpubr::ggarrange(g.IS, g.IS2, nrow = 2)
 
 ggsave(filename = here::here("results", "figs", "figS2.png"),
        plot = figS2,
