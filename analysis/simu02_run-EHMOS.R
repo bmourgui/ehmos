@@ -1,18 +1,12 @@
-############################################%
-# Fit Bayesian EHMOS on simulated data
-#
-# last modification: 09/12/21 (edit annotations)
-# bastien.mourguiart@gmail.com
-#
-# simu02_run-EHMOS.R
-# depends on: simu01_simulate-data.R
-#
-# Script coding and running a Bayesian EHMOS
-# on simulated data.
-# Script to run in a cluster, or segmented.
-# Take several days to run.
-############################################%
+# R code for the simulation study in:
+# A new method to explicitly estimate the shift of optimum along gradients in multispecies studies.
+# B. Mourguiart, B. Liquet, K. Mengersen, T. Couturier, J. Mansons, Y. Braud, A. Besnard
 
+# Script 2: Fit EHMOS model to simulated data
+
+# This script can take several days to run
+# Models' outputs created by this script ("simu_out-ehmos.RData") 
+# can be download at: https://doi.org/10.5061/dryad.0gb5mkm59
 
 load(here::here("results", "simulated_data.RData")) # created in simu01_simulate-data.R
 
