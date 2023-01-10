@@ -1,15 +1,9 @@
-############################################%
-# Calculate performance metrics
-#
-# last modification: 09/12/21 (edit annotations)
-# bastien.mourguiart@gmail.com
-#
-# simu04_compute-performance-metrics.R
-# depends on: simu03_summarise-model-outputs.R
-#
-# Script to calculate performance metrics based
-# on summarized model outputs
-############################################%
+# R code for the simulation study in:
+# A new method to explicitly estimate the shift of optimum along gradients in multispecies studies.
+# B. Mourguiart, B. Liquet, K. Mengersen, T. Couturier, J. Mansons, Y. Braud, A. Besnard
+
+# Script 4: Compute performance metrics (e.g., bias in estimates)
+# (Compare estimates to simulated values)
 
 ## Change scenario names, to scope with final ones
 full.res.shift$scenario <- as.factor(full.res.shift$scenario)
