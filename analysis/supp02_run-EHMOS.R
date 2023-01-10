@@ -1,17 +1,8 @@
-############################################%
-# Fit Bayesian EHMOS on simulated data
-#
-# last modification: 09/12/21 (edit annotations)
-# bastien.mourguiart@gmail.com
-#
-# simu02_run-EHMOS.R
-# depends on: simu01_simulate-data.R
-#
-# Script coding and running a Bayesian EHMOS
-# on simulated data.
-# Script to run in a cluster, or segmented.
-# Take several days to run.
-############################################%
+# R code for the supplementary simulation study in:
+# A new method to explicitly estimate the shift of optimum along gradients in multispecies studies.
+# B. Mourguiart, B. Liquet, K. Mengersen, T. Couturier, J. Mansons, Y. Braud, A. Besnard
+
+# Script 2: Fit EHMOS
 
 library(jagsUI)
 library(foreach)
