@@ -54,8 +54,6 @@ if (simu02.ehmos == "ok"){
 if (simu03 == "ok"){
   load(here::here("results", "simu_res-summary.RData"))
 }else{
-  load(here::here("results", "simu_out-ehmos.RData"))
-  load(here::here("results", "simu_out-glmm.RData"))
   source(here::here("analysis", "simu03_summarise-model-outputs.R"))
 }
 
