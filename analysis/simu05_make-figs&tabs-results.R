@@ -1,5 +1,8 @@
+# R code for the simulation study in:
+# A new method to explicitly estimate the shift of optimum along gradients in multispecies studies.
+# B. Mourguiart, B. Liquet, K. Mengersen, T. Couturier, J. Mansons, Y. Braud, A. Besnard
 
-
+# Script 5: Produce main results (figures and tables)
 
 #### 1. Figure 1: Simulation workflow ----
 ## .. 1.1. Define graphic elements that are used multiple times ####
@@ -159,7 +162,7 @@ cowplot::plot_grid(g_subscenarA, g_subscenarB, g_subscenarC, g_scenar,
                    label_size = 8) -> fig1
 
 ## .. 1.7. Save figure 1 ####
-ggsave(filename = here::here("results", "figs", "fig1.png"),
+ggsave(filename = here::here("results", "figs", "fig1.pdf"),
        plot = fig1,
        height = 190,
        width = 168,
@@ -200,7 +203,7 @@ ggpubr::ggarrange(g.RMSE,
                   nrow = 3) -> fig2
 
 ## .. 2.6. Save figure 2 ####
-ggsave(filename = here::here("results", "figs", "fig2.png"),
+ggsave(filename = here::here("results", "figs", "fig2.pdf"),
        plot = fig2,
        height = 190,
        width = 168,
@@ -301,7 +304,7 @@ perf_sp %>%
 
 figS2 <- ggpubr::ggarrange(g.IS, g.IS2, nrow = 2)
 
-ggsave(filename = here::here("results", "figs", "figS2.png"),
+ggsave(filename = here::here("results", "figs", "figS2.pdf"),
        plot = figS2,
        height = 8.3,
        width = 11.7)
