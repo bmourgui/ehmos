@@ -1,15 +1,9 @@
-############################################%
-# Simulating Optimum Shifts for Multiple Species
-#
-#
-# Script to create virtual presence/absence datasets for 20 virtual species
-# used in the simulation study in the paper about optimum shifts.
-#
-# Simulate eight scenarios that result of the combination of three sub scenarios
-# each decomposed in two categories.
-# Outputs are known ecological parameters for each species (especially true shifts),
-# one occupancy data set per scenario, and 30 pres/abs dataset per scenario
-############################################%
+# R code for the simulation study in:
+# A new method to explicitly estimate the shift of optimum along gradients in multispecies studies.
+# B. Mourguiart, B. Liquet, K. Mengersen, T. Couturier, J. Mansons, Y. Braud, A. Besnard
+
+# Script 1: Simulate occurrence data
+
 
 set.seed(1904) #set a seed for replicability
 
