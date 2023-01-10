@@ -1,12 +1,10 @@
-############################################%
-# Summarise model outputs
-#
-# last modification: 16/12/21 (create file)
-# bastien.mourguiart@gmail.com
-#
-# file name: appli03_summarise-model-outputs.R
-#
-############################################%
+# R code for the application study in:
+# A new method to explicitly estimate the shift of optimum along gradients in multispecies studies.
+# B. Mourguiart, B. Liquet, K. Mengersen, T. Couturier, J. Mansons, Y. Braud, A. Besnard
+
+# Script 3: Transform models' outputs into summary statistics (e.g., mean shift estimates)
+
+# (Outputs of models used in the published manuscript can be download at: https://doi.org/10.5061/dryad.0gb5mkm59)
 
 
 ## Extract mcmc samples of ecological parameters
