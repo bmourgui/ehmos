@@ -2,7 +2,7 @@
 
 This repository contains the data and code to reproduce analysis presented in the paper:
 
-> B. Mourguiart, B. Liquet, K. Mengersen, T. Couturier, J. Mansons, Y. Braud, A. Besnard. A new method to explicitly estimate the shift of optimum along gradients in multispecies studies. *Journal of Biogeography*, (in press).
+> B. Mourguiart, B. Liquet, K. Mengersen, T. Couturier, J. Mansons, Y. Braud, A. Besnard. A new method to explicitly estimate the shift of optimum along gradients in multispecies studies. *Journal of Biogeography*, (in press), doi: 10.1111/jbi.14570.
 
 The paper introduces a new formulation of a Bayesian hierarchical linear model that explicitly estimates optimum shifts for multiple species having symmetrical response curves. This new formulation, called Explicit Hierarchical Model of Optimum Shifts (EHMOS), is compared to a mean comparison method and a Bayesian generalized linear mixed model (GLMM) using simulated and real datasets.
 
